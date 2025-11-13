@@ -1,0 +1,57 @@
+name: bnbfrontendflutter
+description: "A new Flutter project."
+publish_to: 'none' # Prevent publishing to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.8.1 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_localizations:
+    sdk: flutter
+
+  intl: any
+  shared_preferences: ^2.2.2
+  provider: ^6.1.1
+  flutter_launcher_icons: ^0.14.1 
+  http: ^1.1.0
+  path_provider: ^2.1.1
+  fluttertoast: ^8.2.4
+  cached_network_image: ^3.3.0 
+  google_sign_in: ^6.2.1
+  firebase_auth: ^4.16.0
+  firebase_core: ^2.27.0
+  sliding_up_panel: ^2.0.0+1
+  google_maps_flutter: ^2.5.0
+  geolocator: ^10.1.0
+  geocoding: ^2.1.1 
+
+  # Hive dependencies
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.2
+  hive_generator: ^2.0.1
+  build_runner: ^2.5.4
+
+flutter_launcher_icons:
+  android: true
+  image_path: "assets/logo/applogo.png"
+  adaptive_icon_foreground: "assets/logo/applogo.png"
+  adaptive_icon_background: "#F8F2E5"
+
+flutter:
+  generate: true
+  uses-material-design: true
+
+  assets:
+    - assets/icons/
+    - assets/logo/
+    - assets/images/

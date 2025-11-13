@@ -1,0 +1,192 @@
+{
+"chooseLanguage": "English",
+"@@locale": "en",
+"welcometoappname": "Welcome to GestiBora",
+"readOur": "Read our ",
+"privacyPolicy": "Privacy Policy",
+"tapAgree": ". Tap \"Agree and continue\" to accept the ",
+"termsOfService": "Terms of Service",
+"language": "English",
+"agreeAndContinue": "Agree And Continue",
+"guestUser": "Guest User",
+"emailNotAvailable": "Email not available",
+"logOut": "Log Out",
+"logoutConfirmation": "Are you sure you want to log out?",
+"cancelAction": "Cancel",
+"myActivityTitle": "My Activity",
+"currentStaysTitle": "Current Stays",
+"currentStaysSubtitle": "Current stays",
+"upcomingBookingsTitle": "Upcoming Bookings",
+"upcomingBookingsSubtitle": "Scheduled trips",
+"pastStaysTitle": "Past Stays",
+"pastStaysSubtitle": "Previous booked trips",
+"paymentHistoryTitle": "Payment History",
+"paymentHistorySubtitle": "View your payment history",
+"favoritePlacesTitle": "Favorite Places",
+"favoritePlacesCount": "{count, plural, =0 {No properties saved} =1 {1 property saved} other {{count} properties saved}}",
+"@favoritePlacesCount": {
+  "placeholders": {
+    "count": {
+      "type": "int"
+    }
+  }
+},
+"settingsTitle": "Settings",
+"languageTitle": "Language",
+"languageSubtitle": "Change your language",
+"supportAboutTitle": "Support & About",
+"aboutBnBTitle": "About Tanzania BnB",
+"aboutBnBSubtitle": "Learn about Tanzania BnB",
+"termsOfServiceSubtitle": "Read our terms of service",
+"versionLabel": "Version {version}",
+"@versionLabel": {
+  "placeholders": {
+    "version": {}
+  }
+},
+"missingCustomerIdBookings": "Unable to load bookings: missing customer id.",
+"missingCustomerIdPastStays": "Unable to load past stays: missing customer id.",
+"missingCustomerIdTransactions": "Unable to load transactions: missing customer id.",
+"failedToLoadBookings": "Failed to load bookings",
+"failedToLoadPastStays": "Failed to load past stays",
+"failedToLoadTransactions": "Failed to load transactions",
+"failedToLoadMoreBookings": "Failed to load more bookings",
+"failedToLoadMorePastStays": "Failed to load more past stays",
+"failedToLoadMoreTransactions": "Failed to load more transactions",
+"errorLoadingBookings": "Error loading bookings: {error}",
+"@errorLoadingBookings": {
+  "placeholders": {
+    "error": {}
+  }
+},
+"errorLoadingPastStays": "Error loading past stays: {error}",
+"@errorLoadingPastStays": {
+  "placeholders": {
+    "error": {}
+  }
+},
+"errorLoadingTransactions": "Error loading transactions: {error}",
+"@errorLoadingTransactions": {
+  "placeholders": {
+    "error": {}
+  }
+},
+"errorLoadingMoreBookings": "Error loading more bookings: {error}",
+"@errorLoadingMoreBookings": {
+  "placeholders": {
+    "error": {}
+  }
+},
+"errorLoadingMorePastStays": "Error loading more past stays: {error}",
+"@errorLoadingMorePastStays": {
+  "placeholders": {
+    "error": {}
+  }
+},
+"errorLoadingMoreTransactions": "Error loading more transactions: {error}",
+"@errorLoadingMoreTransactions": {
+  "placeholders": {
+    "error": {}
+  }
+},
+"noBookingsFound": "No Bookings Found",
+"noBookingsResponse": "No bookings were found in the response",
+"noTransactionsFound": "No Transactions Found",
+"noTransactionsDescription": "You don't have any transaction history",
+"messageHost": "Message Host",
+"nightCount": "{count, plural, =1 {{count} night} other {{count} nights}}",
+"@nightCount": {
+  "placeholders": {
+    "count": {
+      "type": "int"
+    }
+  }
+},
+"pastBookingsAndStaysTitle": "Past Bookings and Stays",
+"stayCompleted": "Stay completed successfully",
+"transactionHistoryTitle": "Transaction History",
+"paymentMethodLabel": "Payment method: {method}",
+"@paymentMethodLabel": {
+  "placeholders": {
+    "method": {}
+  }
+},
+"referenceLabel": "Reference: {reference}",
+"@referenceLabel": {
+  "placeholders": {
+    "reference": {}
+  }
+},
+"amountLabel": "Amount",
+"processedLabel": "Processed",
+"createdLabel": "Created",
+"transactionStatusMessage": "Transaction {status}",
+"@transactionStatusMessage": {
+  "placeholders": {
+    "status": {}
+  }
+},
+"bookingDetailsTitle": "Booking Details",
+"bookingReferenceLabel": "Booking Reference",
+"stayDatesLabel": "Stay Dates",
+"nightsLabel": "Nights",
+"stayTotalLabel": "Stay Total",
+"propertySectionTitle": "Property",
+"nameLabel": "Name",
+"emailLabel": "Email",
+"addressLabel": "Address",
+"roomSectionTitle": "Room",
+"roomLabel": "Room",
+"pricePerNightLabel": "Price / Night",
+"guestSectionTitle": "Guest",
+"phoneLabel": "Phone",
+"timeAgoDays": "{count, plural, =1 {{count}d ago} other {{count}d ago}}",
+"@timeAgoDays": {
+  "placeholders": {
+    "count": {
+      "type": "int"
+    }
+  }
+},
+"timeAgoHours": "{count, plural, =1 {{count}h ago} other {{count}h ago}}",
+"@timeAgoHours": {
+  "placeholders": {
+    "count": {
+      "type": "int"
+    }
+  }
+},
+"timeAgoMinutes": "{count, plural, =1 {{count}m ago} other {{count}m ago}}",
+"@timeAgoMinutes": {
+  "placeholders": {
+    "count": {
+      "type": "int"
+    }
+  }
+},
+"timeAgoJustNow": "Just now",
+"homeWelcomeTitle": "Welcome to Tanzania BnB",
+"homeWelcomeSubtitle": "Discover amazing stays",
+"homeAccommodationTypeTitle": "Accommodation Type",
+"homeUnknownType": "Unknown",
+"homeNearByTitle": "Nearby",
+"homeViewAll": "View all",
+"homePopularDestinationsTitle": "Popular Destinations",
+"homeAllRegions": "All Regions",
+"homeAllTypes": "All Types",
+"homeLoadingLabel": "Loading...",
+"homeNoDataTitle": "No data available. Tap refresh to try again.",
+"favoritePageTitle": "Favorites",
+"favoriteEmptyTitle": "No favorites yet",
+"favoriteEmptyDescription": "Tap the heart icon on a stay to save it for later.",
+"loginTitle": "Tanzania BnB",
+"loginSubtitle": "Your gateway to authentic stays",
+"loginContinueWithGoogle": "Continue with Google",
+"loginWhyUsTitle": "Why Us?",
+"loginBenefitSaveFavorites": "Save your favorite places",
+"loginBenefitQuickBooking": "Quick booking process",
+"loginBenefitExclusiveDeals": "Get exclusive deals & updates",
+"loginFooterPrefix": "By continuing, you agree to our ",
+"loginFooterTerms": "Terms",
+"loginFooterAnd": " & "
+}

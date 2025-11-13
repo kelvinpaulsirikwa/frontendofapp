@@ -1,0 +1,547 @@
+import 'package:bnbfrontendflutter/bnb/bnbhome/bnbdetails.dart';
+import 'package:bnbfrontendflutter/bnb/bnbhome/bnbroomdetails.dart';
+import 'package:bnbfrontendflutter/bnb/bookingpage/booking.dart';
+import 'package:bnbfrontendflutter/bnb/reusablecomponent/buttons.dart';
+import 'package:bnbfrontendflutter/services/favorites_service.dart';
+import 'package:bnbfrontendflutter/models/bnb_motels_details_model.dart';
+import 'package:bnbfrontendflutter/models/bnbmodel.dart';
+import 'package:bnbfrontendflutter/models/bnbroommodel.dart';
+import 'package:bnbfrontendflutter/utility/colors.dart';
+import 'package:bnbfrontendflutter/utility/images.dart';
+import 'package:bnbfrontendflutter/utility/navigateutility.dart';
+import 'package:flutter/material.dart';
+
+class HotelCards {
+  static Widget horizontalHotelCard({
+    required SimpleMotel motel,
+    required BuildContext context,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        NavigationUtil.pushTo(context, BnBDetails(motel: motel));
+      },
+      child: Container(
+        width: 250,
+        margin: const EdgeInsets.only(right: 16),
+        decoration: BoxDecoration(
+          color: softCream,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: richBrown.withOpacity(0.15),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 140,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    sunsetOrange.withOpacity(0.3),
+                    earthGreen.withOpacity(0.3),
+                  ],
+                ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: Stack(
+                children: [
+                  Center(
+                    child: Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      decoration: BoxDecoration(
+                        color: richBrown.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Showimage.networkImage(
+                        imageUrl: motel.frontImage.toString(),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: earthGreen,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        (motel.motelType),
+                        style: const TextStyle(
+                          color: softCream,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: FavoriteToggleButton(motel: motel),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    motel.name,
+                    style: const TextStyle(
+                      color: textDark,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on_outlined,
+                        size: 14,
+                        color: textLight,
+                      ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          '${motel.streetAddress}, ${motel.district}',
+                          style: const TextStyle(
+                            color: textLight,
+                            fontSize: 12,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.home_outlined,
+                        size: 14,
+                        color: textLight,
+                      ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          motel.motelType,
+                          style: const TextStyle(
+                            color: textLight,
+                            fontSize: 12,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static Widget verticalHotelCard({
+    required SimpleMotel motel,
+    required BuildContext context,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        NavigationUtil.pushTo(context, BnBDetails(motel: motel));
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: softCream,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: richBrown.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 125,
+                height: 125,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      earthGreen.withOpacity(0.3),
+                      sunsetOrange.withOpacity(0.3),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Stack(
+                  children: [
+                    SizedBox(
+                      height: double.infinity,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Showimage.networkImage(
+                          imageUrl: motel.frontImage.toString(),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: FavoriteToggleButton(motel: motel),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      motel.name,
+                      style: const TextStyle(
+                        color: textDark,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${motel.streetAddress}, ${motel.district} ',
+                      style: const TextStyle(color: textLight, fontSize: 13),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: earthGreen,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.star,
+                                  size: 10,
+                                  color: sunsetOrange,
+                                ),
+                                const SizedBox(width: 2),
+                                Text(
+                                  (motel.motelType),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget verticalHotelRooms({
+    required BnbMotelsDetailsModel motelsDetailsModel,
+    required Room room,
+    required BuildContext context,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: softCream,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: richBrown.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Room image
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
+                child: room.frontimage.isNotEmpty
+                    ? SizedBox(
+                        height: 200,
+                        width: double.infinity,
+                        child: Showimage.networkImage(
+                          imageUrl: room.frontimage,
+                        ),
+                      )
+                    : Container(
+                        height: 200,
+                        width: double.infinity,
+                        color: earthGreen.withOpacity(0.1),
+                        child: const Icon(
+                          Icons.bed,
+                          size: 60,
+                          color: earthGreen,
+                        ),
+                      ),
+              ),
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: room.status == 'free'
+                        ? earthGreen
+                        : Colors.red.shade400,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    room.status == 'free' ? 'Available' : 'Occupied',
+                    style: const TextStyle(
+                      color: softCream,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Room details
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Room: ${room.roomnumber}',
+                        style: const TextStyle(
+                          color: textDark,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: deepTerracotta.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        room.roomtype,
+                        style: const TextStyle(
+                          color: deepTerracotta,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Room details row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'TZS ${room.pricepernight.toStringAsFixed(0)}',
+                          style: const TextStyle(
+                            color: earthGreen,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        Text(
+                          'per night',
+                          style: TextStyle(
+                            color: textLight.withOpacity(0.7),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Buttons.bookNowButton(
+                      text: 'View Details',
+                      onTap: () {
+                        NavigationUtil.pushTo(
+                          context,
+                          BnBRoomDetails(
+                            room: room,
+                            motelsDetailsModel: motelsDetailsModel,
+                          ),
+                        );
+                      },
+                    ),
+                    Buttons.bookNowButton(
+                      text: 'Book Now',
+                      onTap: () {
+                        NavigationUtil.pushTo(context, BookingPage(room: room));
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class FavoriteToggleButton extends StatelessWidget {
+  final SimpleMotel motel;
+
+  const FavoriteToggleButton({super.key, required this.motel});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: FavoritesService.listenable(),
+      builder: (context, box, _) {
+        final isFavorite = FavoritesService.isFavorite(motel.id);
+
+        return GestureDetector(
+          onTap: () async {
+            final messenger = ScaffoldMessenger.maybeOf(context);
+
+            if (isFavorite) {
+              final confirm =
+                  await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: Text(
+                        'Remove "${motel.name}" from your favorites?',
+                      ),
+
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: const Text('Remove'),
+                        ),
+                      ],
+                    ),
+                  ) ??
+                  false;
+              if (!confirm) return;
+            }
+
+            final added = await FavoritesService.toggleFavorite(motel);
+            messenger
+              ?..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  content: Text(
+                    '${motel.name} ${added ? 'added to' : 'removed from'} favorites',
+                  ),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: softCream,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              size: 18,
+              color: isFavorite ? sunsetOrange : deepTerracotta,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

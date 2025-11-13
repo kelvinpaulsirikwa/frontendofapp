@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "530279015145",
+    "project_id": "bnb-android-bbbbc",
+    "storage_bucket": "bnb-android-bbbbc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:530279015145:android:1d8223b7c544daad238678",
+        "android_client_info": {
+          "package_name": "tz.co.bnb"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5Hhug2sg4YPHxYZKeC_mf59iSrOkkBbc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,192 @@
+{
+  "chooseLanguage": "Swahili",
+  "@@locale": "sw",
+  "agreeAndContinue": "Kubali na Endelea",
+  "welcometoappname": "Karibu kwenye GestiBora",
+  "readOur": "Soma yetu ",
+  "privacyPolicy": "Sera ya Faragha",
+  "tapAgree": ". Gonga \"Kubali na endelea\" kukubaliana na ",
+  "termsOfService": "Masharti ya Huduma",
+  "language": "Kiswahili",
+  "guestUser": "Mtumiaji Mgeni",
+  "emailNotAvailable": "Barua pepe haipatikani",
+  "logOut": "Toka",
+  "logoutConfirmation": "Una uhakika unataka kutoka?",
+  "cancelAction": "Ghairi",
+  "myActivityTitle": "Shughuli Zangu",
+  "currentStaysTitle": "Malazi ya Sasa",
+  "currentStaysSubtitle": "Malazi yanayoendelea",
+  "upcomingBookingsTitle": "Uhifadhi Ujao",
+  "upcomingBookingsSubtitle": "Safari zilizopangwa",
+  "pastStaysTitle": "Malazi ya Zamani",
+  "pastStaysSubtitle": "Safari zilizohifadhiwa awali",
+  "paymentHistoryTitle": "Historia ya Malipo",
+  "paymentHistorySubtitle": "Tazama historia ya malipo yako",
+  "favoritePlacesTitle": "Maeneo Unayopenda",
+  "favoritePlacesCount": "{count, plural, =0 {Hakuna nyumba zilizohifadhiwa} =1 {Nyumba 1 imehifadhiwa} other {Nyumba {count} zimehifadhiwa}}",
+  "@favoritePlacesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsTitle": "Mipangilio",
+  "languageTitle": "Lugha",
+  "languageSubtitle": "Badilisha lugha yako",
+  "supportAboutTitle": "Msaada na Kuhusu",
+  "aboutBnBTitle": "Kuhusu Tanzania BnB",
+  "aboutBnBSubtitle": "Jifunze kuhusu Tanzania BnB",
+  "termsOfServiceSubtitle": "Soma masharti ya huduma yetu",
+  "versionLabel": "Toleo {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "missingCustomerIdBookings": "Imeshindikana kupakia uhifadhi: kitambulisho cha mteja hakipo.",
+  "missingCustomerIdPastStays": "Imeshindikana kupakia malazi ya zamani: kitambulisho cha mteja hakipo.",
+  "missingCustomerIdTransactions": "Imeshindikana kupakia miamala: kitambulisho cha mteja hakipo.",
+  "failedToLoadBookings": "Imeshindikana kupakia uhifadhi",
+  "failedToLoadPastStays": "Imeshindikana kupakia malazi ya zamani",
+  "failedToLoadTransactions": "Imeshindikana kupakia miamala",
+  "failedToLoadMoreBookings": "Imeshindikana kupakia uhifadhi zaidi",
+  "failedToLoadMorePastStays": "Imeshindikana kupakia malazi ya zamani zaidi",
+  "failedToLoadMoreTransactions": "Imeshindikana kupakia miamala zaidi",
+  "errorLoadingBookings": "Hitilafu wakati wa kupakia uhifadhi: {error}",
+  "@errorLoadingBookings": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorLoadingPastStays": "Hitilafu wakati wa kupakia malazi ya zamani: {error}",
+  "@errorLoadingPastStays": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorLoadingTransactions": "Hitilafu wakati wa kupakia miamala: {error}",
+  "@errorLoadingTransactions": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorLoadingMoreBookings": "Hitilafu wakati wa kupakia uhifadhi zaidi: {error}",
+  "@errorLoadingMoreBookings": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorLoadingMorePastStays": "Hitilafu wakati wa kupakia malazi ya zamani zaidi: {error}",
+  "@errorLoadingMorePastStays": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorLoadingMoreTransactions": "Hitilafu wakati wa kupakia miamala zaidi: {error}",
+  "@errorLoadingMoreTransactions": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "noBookingsFound": "Hakuna uhifadhi uliopatikana",
+  "noBookingsResponse": "Hakuna uhifadhi uliopatikana kwenye majibu",
+  "noTransactionsFound": "Hakuna miamala iliyopatikana",
+  "noTransactionsDescription": "Huna historia yoyote ya miamala",
+  "messageHost": "Tuma ujumbe kwa mwenyeji",
+  "nightCount": "{count, plural, =1 {Usiku {count}} other {Usiku {count}}}",
+  "@nightCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pastBookingsAndStaysTitle": "Uhifadhi na Malazi ya Zamani",
+  "stayCompleted": "Malazi yalikamilika kwa mafanikio",
+  "transactionHistoryTitle": "Historia ya Miamala",
+  "paymentMethodLabel": "Njia ya malipo: {method}",
+  "@paymentMethodLabel": {
+    "placeholders": {
+      "method": {}
+    }
+  },
+  "referenceLabel": "Rejea: {reference}",
+  "@referenceLabel": {
+    "placeholders": {
+      "reference": {}
+    }
+  },
+  "amountLabel": "Kiasi",
+  "processedLabel": "Imechakatwa",
+  "createdLabel": "Imeundwa",
+  "transactionStatusMessage": "Muamala {status}",
+  "@transactionStatusMessage": {
+    "placeholders": {
+      "status": {}
+    }
+  },
+  "bookingDetailsTitle": "Maelezo ya Uhifadhi",
+  "bookingReferenceLabel": "Rejea ya Uhifadhi",
+  "stayDatesLabel": "Tarehe za Kukaa",
+  "nightsLabel": "Usiku",
+  "stayTotalLabel": "Jumla ya Malazi",
+  "propertySectionTitle": "Mali",
+  "nameLabel": "Jina",
+  "emailLabel": "Barua pepe",
+  "addressLabel": "Anwani",
+  "roomSectionTitle": "Chumba",
+  "roomLabel": "Chumba",
+  "pricePerNightLabel": "Bei kwa Usiku",
+  "guestSectionTitle": "Mgeni",
+  "phoneLabel": "Simu",
+  "timeAgoDays": "{count, plural, =1 {siku {count} zilizopita} other {siku {count} zilizopita}}",
+  "@timeAgoDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeAgoHours": "{count, plural, =1 {saa {count} zilizopita} other {saa {count} zilizopita}}",
+  "@timeAgoHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeAgoMinutes": "{count, plural, =1 {dakika {count} zilizopita} other {dakika {count} zilizopita}}",
+  "@timeAgoMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeAgoJustNow": "Sasa hivi",
+  "homeWelcomeTitle": "Karibu Tanzania BnB",
+  "homeWelcomeSubtitle": "Gundua malazi ya kuvutia",
+  "homeAccommodationTypeTitle": "Aina ya Malazi",
+  "homeUnknownType": "Haijulikani",
+  "homeNearByTitle": "Karibu",
+  "homeViewAll": "Tazama yote",
+  "homePopularDestinationsTitle": "Maeneo Maarufu",
+  "homeAllRegions": "Mikoa Yote",
+  "homeAllTypes": "Aina Zote",
+  "homeLoadingLabel": "Inapakia...",
+  "homeNoDataTitle": "Hakuna data. Gusa upya kujaribu tena.",
+  "favoritePageTitle": "Vipendwa",
+  "favoriteEmptyTitle": "Bado hakuna vipendwa",
+  "favoriteEmptyDescription": "Gonga ikoni ya moyo kwenye malazi uyapendayo ili kuyaokoa kwa baadaye.",
+  "loginTitle": "Tanzania BnB",
+  "loginSubtitle": "Mlango wako wa malazi halisi",
+  "loginContinueWithGoogle": "Endelea kwa Google",
+  "loginWhyUsTitle": "Kwa nini sisi?",
+  "loginBenefitSaveFavorites": "Hifadhi maeneo unayoyapenda",
+  "loginBenefitQuickBooking": "Mchakato wa kuhifadhi kwa haraka",
+  "loginBenefitExclusiveDeals": "Pata ofa maalum na masasisho",
+  "loginFooterPrefix": "Kwa kuendelea, unakubali ",
+  "loginFooterTerms": "Masharti",
+  "loginFooterAnd": " na "
+}
