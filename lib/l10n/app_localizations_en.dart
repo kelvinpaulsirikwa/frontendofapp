@@ -314,10 +314,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timeAgoJustNow => 'Just now';
 
   @override
-  String get homeWelcomeTitle => 'Welcome to Tanzania BnB';
+  String get homeWelcomeTitle => 'Welcome To FBC';
 
   @override
-  String get homeWelcomeSubtitle => 'Discover amazing stays';
+  String get homeWelcomeSubtitle => 'Your Smile Our Smile';
 
   @override
   String get homeAccommodationTypeTitle => 'Accommodation Type';
@@ -347,7 +347,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeNoDataTitle => 'No data available. Tap refresh to try again.';
 
   @override
-  String get favoritePageTitle => 'Favorites';
+  String get favoritePageTitle => 'Your Favorites';
 
   @override
   String get favoriteEmptyTitle => 'No favorites yet';
@@ -357,7 +357,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tap the heart icon on a stay to save it for later.';
 
   @override
-  String get loginTitle => 'Tanzania BnB';
+  String get loginTitle => 'BnB';
 
   @override
   String get loginSubtitle => 'Your gateway to authentic stays';

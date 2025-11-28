@@ -15,6 +15,7 @@ import 'package:bnbfrontendflutter/utility/colors.dart';
 import 'package:bnbfrontendflutter/utility/sharedpreferences.dart';
 import 'package:bnbfrontendflutter/bnb/bnbhome/favorite.dart';
 import 'package:bnbfrontendflutter/services/favorites_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfileAccount extends StatefulWidget {
   const ProfileAccount({super.key});
@@ -104,13 +105,9 @@ class _ProfileAccountState extends State<ProfileAccount> {
             const Center(child: CircularProgressIndicator(color: earthGreen)),
       );
 
-      // Perform logout
+      // Perform logout (this navigates to LoginPage and removes all routes,
+      // so we don't need to pop the dialog - it will be removed automatically)
       await _googleSignInManager.signOut(context);
-
-      // Close loading dialog (if still mounted)
-      if (context.mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
-      }
     }
   }
 

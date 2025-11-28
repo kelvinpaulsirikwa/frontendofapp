@@ -79,6 +79,12 @@ class _BnBRoomDetailsState extends State<BnBRoomDetails>
         _isLoading = false;
         _hasError = false;
       });
+
+      // Debug: Print loaded images
+      print('📷 Loaded ${_images.length} room images:');
+      for (var img in _images) {
+        print('  - ID: ${img.id}, ImageUrl: ${img.imageUrl}');
+      }
     } catch (e) {
       print('Error loading room data: $e');
       setState(() {
@@ -167,42 +173,7 @@ class _BnBRoomDetailsState extends State<BnBRoomDetails>
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          image.imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                color: richBrown.withOpacity(0.1),
-                                child: const Icon(
-                                  Icons.image,
-                                  size: 40,
-                                  color: richBrown,
-                                ),
-                              ),
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Container(
-                              color: richBrown.withOpacity(0.05),
-                              child: Center(
-                                child: AnimatedBuilder(
-                                  animation: _loadingController,
-                                  builder: (context, child) {
-                                    return CustomPaint(
-                                      size: const Size(30, 30),
-                                      painter: TanzanianLoadingPainter(
-                                        animationValue:
-                                            _loadingController.value,
-                                        terracotta: deepTerracotta,
-                                        green: earthGreen,
-                                        orange: sunsetOrange,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                        child: Showimage.networkImage(imageUrl: image.imageUrl),
                       ),
                     );
                   },
@@ -729,42 +700,32 @@ class _BnBRoomDetailsState extends State<BnBRoomDetails>
                                     children: [
                                       ClipRRect(
                                         borderRadius: BorderRadius.circular(8),
-                                        child: Image.network(
-                                          _images[index].imageUrl,
+                                        child: SizedBox(
                                           width: 80,
                                           height: 80,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  Container(
-                                                    width: 80,
-                                                    height: 80,
-                                                    color: earthGreen
-                                                        .withOpacity(0.1),
-                                                    child: const Icon(
-                                                      Icons.image,
-                                                      color: earthGreen,
-                                                      size: 24,
-                                                    ),
-                                                  ),
-                                        ),
-                                      ),
-                                      Container(
-                                        width: 80,
-                                        height: 80,
-                                        decoration: BoxDecoration(
-                                          color: Colors.black.withOpacity(0.6),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
+                                          child: Showimage.networkImage(
+                                            imageUrl: _images[index].imageUrl,
                                           ),
                                         ),
-                                        child: Center(
-                                          child: Text(
-                                            '+${_images.length - 4}',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
+                                      ),
+                                      Positioned.fill(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withOpacity(
+                                              0.6,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              '+${_images.length - 4}',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -784,58 +745,12 @@ class _BnBRoomDetailsState extends State<BnBRoomDetails>
                                   ),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      _images[index].imageUrl,
+                                    child: SizedBox(
                                       width: 80,
                                       height: 80,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              Container(
-                                                width: 80,
-                                                height: 80,
-                                                color: earthGreen.withOpacity(
-                                                  0.1,
-                                                ),
-                                                child: const Icon(
-                                                  Icons.image,
-                                                  color: earthGreen,
-                                                  size: 24,
-                                                ),
-                                              ),
-                                      loadingBuilder:
-                                          (context, child, loadingProgress) {
-                                            if (loadingProgress == null)
-                                              return child;
-                                            return Container(
-                                              width: 80,
-                                              height: 80,
-                                              color: earthGreen.withOpacity(
-                                                0.05,
-                                              ),
-                                              child: Center(
-                                                child: AnimatedBuilder(
-                                                  animation: _loadingController,
-                                                  builder: (context, child) {
-                                                    return CustomPaint(
-                                                      size: const Size(30, 30),
-                                                      painter:
-                                                          TanzanianLoadingPainter(
-                                                            animationValue:
-                                                                _loadingController
-                                                                    .value,
-                                                            terracotta:
-                                                                deepTerracotta,
-                                                            green: earthGreen,
-                                                            orange:
-                                                                sunsetOrange,
-                                                          ),
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                            );
-                                          },
+                                      child: Showimage.networkImage(
+                                        imageUrl: _images[index].imageUrl,
+                                      ),
                                     ),
                                   ),
                                 ),

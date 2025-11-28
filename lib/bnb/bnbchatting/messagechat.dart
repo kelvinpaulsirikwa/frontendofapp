@@ -85,6 +85,7 @@ class _MessageChatState extends State<MessageChat> {
         _chatId!,
         page: _currentPage,
         limit: 50,
+        context: context,
       );
 
       if (mounted) {
@@ -132,6 +133,7 @@ class _MessageChatState extends State<MessageChat> {
         _chatId!,
         page: 1,
         limit: 50,
+        context: context,
       );
 
       if (!mounted) return;
@@ -188,6 +190,7 @@ class _MessageChatState extends State<MessageChat> {
       final chatResponse = await ChatService.createOrGetChat(
         bookingId: widget.bookingId,
         motelId: widget.motelId,
+        context: context,
       );
 
       if (!mounted) return;
@@ -205,6 +208,7 @@ class _MessageChatState extends State<MessageChat> {
           chatId,
           page: 1,
           limit: 50, // Load first 50 messages
+          context: context,
         );
 
         if (mounted) {
@@ -283,6 +287,7 @@ class _MessageChatState extends State<MessageChat> {
         final chatResponse = await ChatService.createOrGetChat(
           bookingId: widget.bookingId,
           motelId: widget.motelId,
+          context: context,
         );
 
         if (!mounted) {
@@ -321,6 +326,7 @@ class _MessageChatState extends State<MessageChat> {
       final response = await ChatService.sendMessage(
         chatId: chatIdToUse!,
         message: messageText,
+        context: context,
       );
 
       if (mounted) {

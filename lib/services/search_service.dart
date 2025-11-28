@@ -1,66 +1,42 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'bnbconnection.dart';
+import 'package:bnbfrontendflutter/services/api_client.dart';
+import 'package:bnbfrontendflutter/services/bnbconnection.dart';
+import 'package:flutter/material.dart';
 
 class SearchService {
-  static Future<List<dynamic>> getRegions() async {
-    try {
-      String url = '$baseUrl/search/regions';
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+  static Future<List<dynamic>> getRegions({
+    BuildContext? context,
+  }) async {
+    debugPrint('Fetching search regions');
 
-      print('Search Regions API Response Status: ${response.statusCode}');
+    final response = await ApiClient.get(
+      '/search/regions',
+      context: context,
+    );
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        if (data['success'] == true && data['data'] != null) {
-          return data['data'];
-        } else {
-          throw Exception('Failed to parse regions data');
-        }
-      } else {
-        throw Exception('Failed to fetch regions: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching regions: $e');
+    debugPrint('Search Regions Response: $response');
+
+    if (response['success'] == true && response['data'] != null) {
+      return response['data'];
+    } else {
       return [];
     }
   }
 
-  static Future<List<dynamic>> getAmenities() async {
-    try {
-      String url = '$baseUrl/search/amenities';
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+  static Future<List<dynamic>> getAmenities({
+    BuildContext? context,
+  }) async {
+    debugPrint('Fetching search amenities');
 
-      print('Search Amenities API Response Status: ${response.statusCode}');
+    final response = await ApiClient.get(
+      '/search/amenities',
+      context: context,
+    );
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        if (data['success'] == true && data['data'] != null) {
-          return data['data'];
-        } else {
-          throw Exception('Failed to parse amenities data');
-        }
-      } else {
-        throw Exception('Failed to fetch amenities: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching amenities: $e');
+    debugPrint('Search Amenities Response: $response');
+
+    if (response['success'] == true && response['data'] != null) {
+      return response['data'];
+    } else {
       return [];
     }
   }
@@ -72,85 +48,59 @@ class SearchService {
     String sortBy = 'all',
     int page = 1,
     int limit = 10,
+    BuildContext? context,
   }) async {
-    try {
-      String url = '$baseUrl/search/motels';
+    debugPrint('Searching motels');
 
-      // Build query parameters
-      Map<String, dynamic> queryParams = {
-        'page': page.toString(),
-        'limit': limit.toString(),
-        'sort_by': sortBy,
-      };
+    // Build query parameters
+    Map<String, String> queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+      'sort_by': sortBy,
+    };
 
-      if (search != null && search.isNotEmpty) {
-        queryParams['search'] = search;
-      }
+    if (search != null && search.isNotEmpty) {
+      queryParams['search'] = search;
+    }
 
-      if (regions != null && regions.isNotEmpty) {
-        queryParams['regions'] = regions.join(',');
-      }
+    if (regions != null && regions.isNotEmpty) {
+      queryParams['regions'] = regions.join(',');
+    }
 
-      if (amenities != null && amenities.isNotEmpty) {
-        queryParams['amenities'] = amenities.join(',');
-      }
+    if (amenities != null && amenities.isNotEmpty) {
+      queryParams['amenities'] = amenities.join(',');
+    }
 
-      // Build URL with query parameters
-      String queryString = queryParams.entries
-          .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
-          .join('&');
+    final response = await ApiClient.get(
+      '/search/motels',
+      context: context,
+      queryParams: queryParams,
+    );
 
-      if (queryString.isNotEmpty) {
-        url += '?$queryString';
-      }
+    debugPrint('Search Motels Response: $response');
 
-      print('Searching motels from: $url');
-
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
-
-      print('Search Motels API Response Status: ${response.statusCode}');
-      print('Search Motels API Response Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        if (data['success'] == true && data['data'] != null) {
-          // Construct full image URLs for each motel
-          final List<dynamic> motels = data['data'];
-          for (var motel in motels) {
-            if (motel['front_image'] != null &&
-                motel['front_image'].isNotEmpty) {
-              motel['front_image'] = '$baseUrl/storage/${motel['front_image']}';
-            }
-            // Also construct owner profile image URL if exists
-            if (motel['owner'] != null &&
-                motel['owner']['profileimage'] != null &&
-                motel['owner']['profileimage'].isNotEmpty) {
-              motel['owner']['profileimage'] =
-                  '$baseUrl/storage/${motel['owner']['profileimage']}';
-            }
-          }
-          return data;
-        } else {
-          throw Exception('Failed to parse search results');
+    if (response['success'] == true && response['data'] != null) {
+      // Construct full image URLs for each motel
+      final List<dynamic> motels = response['data'];
+      for (var motel in motels) {
+        if (motel['front_image'] != null && motel['front_image'].isNotEmpty) {
+          motel['front_image'] = '$baseUrl/storage/${motel['front_image']}';
         }
-      } else {
-        throw Exception('Failed to search motels: ${response.statusCode}');
+        // Also construct owner profile image URL if exists
+        if (motel['owner'] != null &&
+            motel['owner']['profileimage'] != null &&
+            motel['owner']['profileimage'].isNotEmpty) {
+          motel['owner']['profileimage'] =
+              '$baseUrl/storage/${motel['owner']['profileimage']}';
+        }
       }
-    } catch (e) {
-      print('Error searching motels: $e');
+      return response;
+    } else {
       return {
         'success': false,
         'data': [],
         'pagination': {},
-        'message': 'Failed to search motels',
+        'message': response['message'] ?? 'Failed to search motels',
       };
     }
   }
@@ -159,66 +109,44 @@ class SearchService {
     int motelId, {
     int page = 1,
     int limit = 5,
+    BuildContext? context,
   }) async {
-    try {
-      String url =
-          '$baseUrl/search/motels/$motelId/images?page=$page&limit=$limit';
+    debugPrint('Fetching motel images for: $motelId');
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+    final queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
 
-      print('Motel Images API Response Status: ${response.statusCode}');
+    final response = await ApiClient.get(
+      '/search/motels/$motelId/images',
+      context: context,
+      queryParams: queryParams,
+    );
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        if (data['success'] == true && data['data'] != null) {
-          return data['data'];
-        } else {
-          throw Exception('Failed to parse motel images data');
-        }
-      } else {
-        throw Exception('Failed to fetch motel images: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching motel images: $e');
+    debugPrint('Motel Images Response: $response');
+
+    if (response['success'] == true && response['data'] != null) {
+      return response['data'];
+    } else {
       return [];
     }
   }
 
-  static Future<bool> trackSearch(List<int> motelIds) async {
-    try {
-      String url = '$baseUrl/search/track';
+  static Future<bool> trackSearch(
+    List<int> motelIds, {
+    BuildContext? context,
+  }) async {
+    debugPrint('Tracking search for motels: $motelIds');
 
-      final response = await http
-          .post(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: json.encode({'motel_ids': motelIds}),
-          )
-          .timeout(Duration(seconds: 30));
+    final response = await ApiClient.post(
+      '/search/track',
+      context: context,
+      body: {'motel_ids': motelIds},
+    );
 
-      print('Track Search API Response Status: ${response.statusCode}');
+    debugPrint('Track Search Response: $response');
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        return data['success'] == true;
-      } else {
-        print('Failed to track search: ${response.statusCode}');
-        return false;
-      }
-    } catch (e) {
-      print('Error tracking search: $e');
-      return false;
-    }
+    return response['success'] == true;
   }
 }

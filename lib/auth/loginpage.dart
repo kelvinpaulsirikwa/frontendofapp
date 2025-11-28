@@ -2,6 +2,7 @@ import 'package:bnbfrontendflutter/l10n/app_localizations.dart';
 import 'package:bnbfrontendflutter/l10n/languagemanagemen.dart';
 import 'package:bnbfrontendflutter/services/google_auth_sign.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
+import 'package:bnbfrontendflutter/utility/componet.dart';
 import 'package:flutter/material.dart';
 import 'package:bnbfrontendflutter/utility/alert.dart';
 
@@ -44,6 +45,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     final local = AppLocalizations.of(context)!;
 
     return Scaffold(
+      appBar: KivuliAppBar(),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(

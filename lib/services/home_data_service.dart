@@ -3,29 +3,73 @@ import 'package:bnbfrontendflutter/services/district_service.dart';
 import 'package:bnbfrontendflutter/services/motel_type_service.dart';
 import 'package:bnbfrontendflutter/services/simple_motel_service.dart';
 import 'package:bnbfrontendflutter/models/bnbmodel.dart';
+import 'package:flutter/material.dart';
 
 class HomeDataService {
-  static Future<Map<String, dynamic>> loadAllData() async {
+  static Future<Map<String, dynamic>> loadAllData({
+    double? latitude,
+    double? longitude,
+    BuildContext? context,
+  }) async {
     try {
       // Load all data in parallel
       final results = await Future.wait([
-        RegionService.getRegions(),
-        DistrictService.getDistricts(),
-        MotelTypeService.getAccommodationTypes(),
-        SimpleMotelService.getFeaturedForUI(),
-        SimpleMotelService.getPopularForUI(),
+        RegionService.getRegions(context: context),
+        DistrictService.getDistricts(context: context),
+        MotelTypeService.getAccommodationTypes(context: context),
+        SimpleMotelService.getFeaturedForUI(
+          latitude: latitude,
+          longitude: longitude,
+          context: context,
+        ),
+        SimpleMotelService.getPopularForUI(
+          page: 1,
+          limit: 10,
+          latitude: latitude,
+          longitude: longitude,
+          context: context,
+        ),
       ]);
+
+      final popularResult = results[4] as Map<String, dynamic>;
+
+      // Check if any request was unauthorized (ApiClient handles logout)
+      if (popularResult['unauthorized'] == true) {
+        return {
+          'success': false,
+          'unauthorized': true,
+          'regions': <Region>[],
+          'districts': <District>[],
+          'accommodationTypes': <Map<String, dynamic>>[],
+          'featured': <SimpleMotel>[],
+          'popular': <SimpleMotel>[],
+          'popularPagination': <String, dynamic>{},
+        };
+      }
+
+      // Safely get motels list
+      List<SimpleMotel> popularMotels = [];
+      if (popularResult['motels'] != null) {
+        popularMotels = popularResult['motels'] as List<SimpleMotel>;
+      }
+
+      // Safely get pagination
+      Map<String, dynamic> pagination = {};
+      if (popularResult['pagination'] != null) {
+        pagination = Map<String, dynamic>.from(popularResult['pagination']);
+      }
 
       return {
         'regions': results[0] as List<Region>,
         'districts': results[1] as List<District>,
         'accommodationTypes': results[2] as List<Map<String, dynamic>>,
         'featured': results[3] as List<SimpleMotel>,
-        'popular': results[4] as List<SimpleMotel>,
+        'popular': popularMotels,
+        'popularPagination': pagination,
         'success': true,
       };
     } catch (e) {
-      print('Error loading home data: $e');
+      debugPrint('Error loading home data: $e');
       return {
         'success': false,
         'error': e.toString(),
@@ -34,6 +78,7 @@ class HomeDataService {
         'accommodationTypes': <Map<String, dynamic>>[],
         'featured': <SimpleMotel>[],
         'popular': <SimpleMotel>[],
+        'popularPagination': <String, dynamic>{},
       };
     }
   }
@@ -45,10 +90,15 @@ class HomeDataService {
     int? typeId,
     String sortBy = 'name',
     String sortOrder = 'asc',
+    int page = 1,
+    int limit = 10,
+    double? latitude,
+    double? longitude,
+    BuildContext? context,
   }) async {
     try {
       // Convert string parameters to enum values
-      MotelSortBy motelSortBy = MotelSortBy.name;
+      MotelSortBy motelSortBy = MotelSortBy.motel_type;
       MotelSortOrder motelSortOrder = MotelSortOrder.asc;
 
       switch (sortBy.toLowerCase()) {
@@ -59,7 +109,7 @@ class HomeDataService {
           motelSortBy = MotelSortBy.district;
           break;
         default:
-          motelSortBy = MotelSortBy.name;
+          motelSortBy = MotelSortBy.motel_type;
       }
 
       motelSortOrder = sortOrder.toLowerCase() == 'desc'
@@ -75,29 +125,64 @@ class HomeDataService {
           motelTypeId: typeId,
           sortBy: motelSortBy,
           sortOrder: motelSortOrder,
+          page: page,
+          limit: limit,
+          latitude: latitude,
+          longitude: longitude,
+          context: context,
         ),
-        SimpleMotelService.getFeaturedForUI(),
+        SimpleMotelService.getFeaturedForUI(
+          latitude: latitude,
+          longitude: longitude,
+          context: context,
+        ),
       ]);
 
-      List<SimpleMotel> filteredMotels = results[0];
-      List<SimpleMotel> featured = results[1];
+      final filteredResult = results[0] as Map<String, dynamic>;
+      List<SimpleMotel> featured = results[1] as List<SimpleMotel>;
 
-      // Use filtered motels directly for popular section
-      List<SimpleMotel> popular = filteredMotels.take(10).toList();
+      // Check if unauthorized (ApiClient handles logout)
+      if (filteredResult['unauthorized'] == true) {
+        return {
+          'success': false,
+          'unauthorized': true,
+          'featured': <SimpleMotel>[],
+          'popular': <SimpleMotel>[],
+          'popularPagination': <String, dynamic>{},
+          'allMotels': <SimpleMotel>[],
+        };
+      }
+
+      // Safely get motels list
+      List<SimpleMotel> allMotels = [];
+      if (filteredResult['motels'] != null) {
+        allMotels = filteredResult['motels'] as List<SimpleMotel>;
+      }
+
+      // Use filtered motels for popular section (limit to 10 for Near By)
+      List<SimpleMotel> popular = allMotels.take(10).toList();
+
+      // Safely get pagination
+      Map<String, dynamic> pagination = {};
+      if (filteredResult['pagination'] != null) {
+        pagination = Map<String, dynamic>.from(filteredResult['pagination']);
+      }
 
       return {
         'featured': featured,
         'popular': popular,
-        'allMotels': filteredMotels,
+        'popularPagination': pagination,
+        'allMotels': allMotels,
         'success': true,
       };
     } catch (e) {
-      print('Error loading filtered data: $e');
+      debugPrint('Error loading filtered data: $e');
       return {
         'success': false,
         'error': e.toString(),
         'featured': <SimpleMotel>[],
         'popular': <SimpleMotel>[],
+        'popularPagination': <String, dynamic>{},
         'allMotels': <SimpleMotel>[],
       };
     }

@@ -1,7 +1,5 @@
-import 'dart:convert';
-import 'package:bnbfrontendflutter/services/bnbconnection.dart';
+import 'package:bnbfrontendflutter/services/api_client.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class BookingService {
   // Check room availability
@@ -9,43 +7,22 @@ class BookingService {
     required int roomId,
     required String checkInDate,
     required String checkOutDate,
+    BuildContext? context,
   }) async {
-    try {
-      final url = Uri.parse('$baseUrl/check-room-availability');
+    debugPrint('Checking room availability for room: $roomId');
 
-      debugPrint('Checking room availability: $url');
+    final response = await ApiClient.post(
+      '/check-room-availability',
+      context: context,
+      body: {
+        'room_id': roomId,
+        'check_in_date': checkInDate,
+        'check_out_date': checkOutDate,
+      },
+    );
 
-      final response = await http
-          .post(
-            url,
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: json.encode({
-              'room_id': roomId,
-              'check_in_date': checkInDate,
-              'check_out_date': checkOutDate,
-            }),
-          )
-          .timeout(const Duration(seconds: 30));
-
-      debugPrint('Check Room Availability Response: ${response.statusCode}');
-      debugPrint('Response Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        return {
-          'success': false,
-          'message': 'Failed to check room availability',
-          'error': response.body,
-        };
-      }
-    } catch (e) {
-      debugPrint('Error checking room availability: $e');
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
-    }
+    debugPrint('Check Room Availability Response: $response');
+    return response;
   }
 
   // Create booking and process payment
@@ -58,55 +35,31 @@ class BookingService {
     required String paymentMethod,
     String? paymentReference,
     String? specialRequests,
+    BuildContext? context,
   }) async {
-    try {
-      final url = Uri.parse('$baseUrl/create-booking');
+    debugPrint('Creating booking for room: $roomId');
 
-      debugPrint('Creating booking: $url');
+    final requestBody = {
+      'room_id': roomId,
+      'customer_id': customerId,
+      'check_in_date': checkInDate,
+      'check_out_date': checkOutDate,
+      'contact_number': contactNumber,
+      'payment_method': paymentMethod,
+      'payment_reference': paymentReference,
+      'special_requests': specialRequests,
+    };
 
-      final requestBody = {
-        'room_id': roomId,
-        'customer_id': customerId,
-        'check_in_date': checkInDate,
-        'check_out_date': checkOutDate,
-        'contact_number': contactNumber,
-        'payment_method': paymentMethod,
-        'payment_reference': paymentReference,
-        'special_requests': specialRequests,
-      };
+    debugPrint('Request Body: $requestBody');
 
-      debugPrint('Request Body: $requestBody');
+    final response = await ApiClient.post(
+      '/create-booking',
+      context: context,
+      body: requestBody,
+    );
 
-      final response = await http
-          .post(
-            url,
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: json.encode(requestBody),
-          )
-          .timeout(const Duration(seconds: 30));
-
-      debugPrint('Create Booking Response: ${response.statusCode}');
-      debugPrint('Response Body: ${response.body}');
-
-      final responseData = json.decode(response.body);
-
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        return responseData;
-      } else {
-        // Handle validation errors (422) or other errors
-        return {
-          'success': false,
-          'message': responseData['message'] ?? 'Failed to create booking',
-          'errors': responseData['errors'] ?? {},
-        };
-      }
-    } catch (e) {
-      debugPrint('Error creating booking: $e');
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
-    }
+    debugPrint('Create Booking Response: $response');
+    return response;
   }
 
   // Retry payment for failed booking
@@ -114,67 +67,37 @@ class BookingService {
     required int bookingId,
     required String paymentMethod,
     String? paymentReference,
+    BuildContext? context,
   }) async {
-    try {
-      final url = Uri.parse('$baseUrl/retry-payment/$bookingId');
+    debugPrint('Retrying payment for booking: $bookingId');
 
-      debugPrint('Retrying payment for booking: $bookingId');
+    final response = await ApiClient.post(
+      '/retry-payment/$bookingId',
+      context: context,
+      body: {
+        'payment_method': paymentMethod,
+        'payment_reference': paymentReference,
+      },
+    );
 
-      final response = await http
-          .post(
-            url,
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: json.encode({
-              'payment_method': paymentMethod,
-              'payment_reference': paymentReference,
-            }),
-          )
-          .timeout(const Duration(seconds: 30));
-
-      debugPrint('Retry Payment Response: ${response.statusCode}');
-      debugPrint('Response Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        final errorResponse = json.decode(response.body);
-        return {
-          'success': false,
-          'message': errorResponse['message'] ?? 'Failed to retry payment',
-        };
-      }
-    } catch (e) {
-      debugPrint('Error retrying payment: $e');
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
-    }
+    debugPrint('Retry Payment Response: $response');
+    return response;
   }
 
   // Get booking details
-  static Future<Map<String, dynamic>> getBookingDetails(int bookingId) async {
-    try {
-      final url = Uri.parse('$baseUrl/booking/$bookingId');
+  static Future<Map<String, dynamic>> getBookingDetails(
+    int bookingId, {
+    BuildContext? context,
+  }) async {
+    debugPrint('Getting booking details for: $bookingId');
 
-      debugPrint('Getting booking details: $url');
+    final response = await ApiClient.get(
+      '/booking/$bookingId',
+      context: context,
+    );
 
-      final response = await http
-          .get(url, headers: {'Accept': 'application/json'})
-          .timeout(const Duration(seconds: 30));
-
-      debugPrint('Get Booking Details Response: ${response.statusCode}');
-      debugPrint('Response Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        return {'success': false, 'message': 'Failed to get booking details'};
-      }
-    } catch (e) {
-      debugPrint('Error getting booking details: $e');
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
-    }
+    debugPrint('Get Booking Details Response: $response');
+    return response;
   }
 
   // Get customer bookings
@@ -183,41 +106,24 @@ class BookingService {
     int page = 1,
     int limit = 10,
     String? filter,
+    BuildContext? context,
   }) async {
-    try {
-      final queryParameters = {
-        'page': page.toString(),
-        'limit': limit.toString(),
-        if (filter != null && filter.isNotEmpty) 'filter': filter,
-      };
+    final queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+      if (filter != null && filter.isNotEmpty) 'filter': filter,
+    };
 
-      final url = Uri.parse(
-        '$baseUrl/booking/customer/$customerId',
-      ).replace(queryParameters: queryParameters);
+    debugPrint('Fetching customer bookings for: $customerId');
 
-      debugPrint('Fetching customer bookings: $url');
+    final response = await ApiClient.get(
+      '/booking/customer/$customerId',
+      context: context,
+      queryParams: queryParams,
+    );
 
-      final response = await http
-          .get(url, headers: {'Accept': 'application/json'})
-          .timeout(const Duration(seconds: 30));
-
-      debugPrint(
-        'Customer Bookings API Response Status: ${response.statusCode}',
-      );
-      debugPrint('Customer Bookings API Response Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        return {
-          'success': false,
-          'message': 'Failed to fetch customer bookings',
-        };
-      }
-    } catch (e) {
-      debugPrint('Error fetching customer bookings: $e');
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
-    }
+    debugPrint('Customer Bookings Response: $response');
+    return response;
   }
 
   static Future<Map<String, dynamic>> getCustomerTransactions(
@@ -225,78 +131,44 @@ class BookingService {
     int page = 1,
     int limit = 20,
     String? status,
+    BuildContext? context,
   }) async {
-    try {
-      final queryParameters = {
-        'page': page.toString(),
-        'limit': limit.toString(),
-        if (status != null && status.isNotEmpty) 'status': status,
-      };
+    final queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+      if (status != null && status.isNotEmpty) 'status': status,
+    };
 
-      final url = Uri.parse(
-        '$baseUrl/booking/customer/$customerId/transactions',
-      ).replace(queryParameters: queryParameters);
+    debugPrint('Fetching customer transactions for: $customerId');
 
-      debugPrint('Fetching customer transactions: $url');
+    final response = await ApiClient.get(
+      '/booking/customer/$customerId/transactions',
+      context: context,
+      queryParams: queryParams,
+    );
 
-      final response = await http
-          .get(url, headers: {'Accept': 'application/json'})
-          .timeout(const Duration(seconds: 30));
-
-      debugPrint(
-        'Customer Transactions API Response Status: ${response.statusCode}',
-      );
-      debugPrint('Customer Transactions API Response Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        return {
-          'success': false,
-          'message': 'Failed to fetch customer transactions',
-        };
-      }
-    } catch (e) {
-      debugPrint('Error fetching customer transactions: $e');
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
-    }
+    debugPrint('Customer Transactions Response: $response');
+    return response;
   }
 
   // Cancel booking (legacy method)
   static Future<Map<String, dynamic>> cancelBookingLegacy({
     required int bookingId,
     required int customerId,
+    BuildContext? context,
   }) async {
-    try {
-      final url = Uri.parse('$baseUrl/booking/cancel');
+    debugPrint('Canceling booking: $bookingId');
 
-      debugPrint('Canceling booking: $url');
+    final response = await ApiClient.post(
+      '/booking/cancel',
+      context: context,
+      body: {
+        'booking_id': bookingId,
+        'customer_id': customerId,
+      },
+    );
 
-      final response = await http
-          .post(
-            url,
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: json.encode({
-              'booking_id': bookingId,
-              'customer_id': customerId,
-            }),
-          )
-          .timeout(const Duration(seconds: 30));
-
-      debugPrint('Cancel Booking API Response Status: ${response.statusCode}');
-      debugPrint('Cancel Booking API Response Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        return {'success': false, 'message': 'Failed to cancel booking'};
-      }
-    } catch (e) {
-      debugPrint('Error canceling booking: $e');
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
-    }
+    debugPrint('Cancel Booking Response: $response');
+    return response;
   }
 }

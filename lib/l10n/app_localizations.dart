@@ -581,13 +581,13 @@ abstract class AppLocalizations {
   /// No description provided for @homeWelcomeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to Tanzania BnB'**
+  /// **'Welcome To FBC'**
   String get homeWelcomeTitle;
 
   /// No description provided for @homeWelcomeSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Discover amazing stays'**
+  /// **'Your Smile Our Smile'**
   String get homeWelcomeSubtitle;
 
   /// No description provided for @homeAccommodationTypeTitle.
@@ -647,7 +647,7 @@ abstract class AppLocalizations {
   /// No description provided for @favoritePageTitle.
   ///
   /// In en, this message translates to:
-  /// **'Favorites'**
+  /// **'Your Favorites'**
   String get favoritePageTitle;
 
   /// No description provided for @favoriteEmptyTitle.
@@ -665,7 +665,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginTitle.
   ///
   /// In en, this message translates to:
-  /// **'Tanzania BnB'**
+  /// **'BnB'**
   String get loginTitle;
 
   /// No description provided for @loginSubtitle.

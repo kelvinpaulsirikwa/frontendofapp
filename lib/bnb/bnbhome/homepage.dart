@@ -1,9 +1,12 @@
 import 'package:bnbfrontendflutter/bnb/bnbhome/ui.dart';
 import 'package:bnbfrontendflutter/services/home_data_service.dart';
 import 'package:bnbfrontendflutter/services/region_service.dart';
+import 'package:bnbfrontendflutter/services/location_service.dart';
 import 'package:bnbfrontendflutter/models/bnbmodel.dart';
 import 'package:bnbfrontendflutter/utility/loading.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
+import 'package:bnbfrontendflutter/utility/alert.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 import 'package:bnbfrontendflutter/l10n/app_localizations.dart';
 
@@ -30,6 +33,15 @@ class _HomePageState extends State<HomePage>
   List<Map<String, dynamic>> _accommodationTypes = [];
   List<SimpleMotel> _featured = [];
   List<SimpleMotel> _popular = [];
+  
+  // Location
+  Position? _currentPosition;
+  bool _locationEnabled = false;
+  
+  // Pagination
+  int _currentPage = 1;
+  bool _hasMorePages = true;
+  bool _isLoadingMore = false;
 
   @override
   void initState() {
@@ -51,20 +63,35 @@ class _HomePageState extends State<HomePage>
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
+      _currentPage = 1;
+      _hasMorePages = true;
     });
 
     try {
-      final data = await HomeDataService.loadAllData();
+      // Try to get current location
+      _currentPosition = await LocationService.getCurrentLocation();
+      _locationEnabled = _currentPosition != null;
+      
+      if (!_locationEnabled) {
+        AlertReturn.showToast('ur location is off');
+      }
+
+      final data = await HomeDataService.loadAllData(
+        latitude: _currentPosition?.latitude,
+        longitude: _currentPosition?.longitude,
+      );
 
       if (data['success'] == true) {
+        final pagination = data['popularPagination'] as Map<String, dynamic>?;
         setState(() {
           _regions = data['regions'] as List<Region>;
           _accommodationTypes =
               data['accommodationTypes'] as List<Map<String, dynamic>>;
-          // Load all motels by default for "Near By" section
-          _featured = data['popular'] as List<SimpleMotel>;
-          // Keep featured motels for "Popular Destinations" section
-          _popular = data['featured'] as List<SimpleMotel>;
+          // Load featured motels for "Near By" section (max 10 items)
+          _featured = (data['featured'] as List<SimpleMotel>).take(10).toList();
+          // Load popular motels for "Popular Destinations" section
+          _popular = data['popular'] as List<SimpleMotel>;
+          _hasMorePages = pagination?['has_more'] ?? false;
           _isLoading = false;
         });
       } else {
@@ -104,11 +131,19 @@ class _HomePageState extends State<HomePage>
     _loadMotelsWithFilters();
   }
 
-  Future<void> _loadMotelsWithFilters() async {
-    if (_isLoading) return;
+  Future<void> _loadMotelsWithFilters({bool loadMore = false}) async {
+    if (_isLoading && !loadMore) return;
+    if (_isLoadingMore && loadMore) return;
+    if (loadMore && !_hasMorePages) return;
 
     setState(() {
-      _isLoading = true;
+      if (loadMore) {
+        _isLoadingMore = true;
+      } else {
+        _isLoading = true;
+        _currentPage = 1;
+        _hasMorePages = true;
+      }
     });
 
     try {
@@ -129,28 +164,47 @@ class _HomePageState extends State<HomePage>
       final filteredData = await HomeDataService.loadFilteredData(
         regionId: regionId > 0 ? regionId : null,
         typeId: typeId > 0 ? typeId : null,
+        page: _currentPage,
+        limit: 10,
+        latitude: _currentPosition?.latitude,
+        longitude: _currentPosition?.longitude,
       );
 
       if (filteredData['success'] == true) {
+        final pagination = filteredData['popularPagination'] as Map<String, dynamic>?;
         setState(() {
-          // Show filtered motels in "Near By" section
-          _featured = filteredData['popular'] as List<SimpleMotel>;
-          // Keep featured motels in "Popular Destinations" section
-          _popular = filteredData['featured'] as List<SimpleMotel>;
+          if (loadMore) {
+            // Append to existing list
+            _popular.addAll(filteredData['popular'] as List<SimpleMotel>);
+            _currentPage++;
+          } else {
+            // Replace list
+            _featured = (filteredData['featured'] as List<SimpleMotel>).take(10).toList();
+            _popular = filteredData['popular'] as List<SimpleMotel>;
+            _currentPage = 2; // Next page for load more
+          }
+          _hasMorePages = pagination?['has_more'] ?? false;
           _isLoading = false;
+          _isLoadingMore = false;
         });
       } else {
         print('Error loading filtered data: ${filteredData['error']}');
         setState(() {
           _isLoading = false;
+          _isLoadingMore = false;
         });
       }
     } catch (e) {
       print('Error loading filtered motels: $e');
       setState(() {
         _isLoading = false;
+        _isLoadingMore = false;
       });
     }
+  }
+
+  Future<void> _loadMorePopular() async {
+    await _loadMotelsWithFilters(loadMore: true);
   }
 
   @override
@@ -167,12 +221,15 @@ class _HomePageState extends State<HomePage>
           accommodationTypes: _accommodationTypes,
           featured: _featured,
           popular: _popular,
+          hasMorePages: _hasMorePages,
+          isLoadingMore: _isLoadingMore,
           onToggleDropdown: _toggleDropdown,
           onRegionSelected: _onRegionSelected,
           onTypeSelected: _onTypeSelected,
           onRefresh: () {
             _loadData();
           },
+          onLoadMore: _loadMorePopular,
         ),
         if (_isLoading)
           Container(

@@ -1,8 +1,6 @@
-import 'dart:convert';
+import 'package:bnbfrontendflutter/services/api_client.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:bnbfrontendflutter/models/bnb_motels_details_model.dart';
-import 'bnbconnection.dart';
 
 class BnbImage {
   final int id;
@@ -183,40 +181,22 @@ class MotelImageModel {
 }
 
 class MotelDetailService {
-  static Future<BnbMotelsDetailsModel?> getMotelDetails(int motelId) async {
-    try {
-      String url = '$baseUrl/motels/$motelId/details';
+  static Future<BnbMotelsDetailsModel?> getMotelDetails(
+    int motelId, {
+    BuildContext? context,
+  }) async {
+    debugPrint('Fetching motel details for: $motelId');
 
-      print('Fetching motel details from: $url');
+    final response = await ApiClient.get(
+      '/motels/$motelId/details',
+      context: context,
+    );
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+    debugPrint('Motel Details Response: $response');
 
-      print('Motel Details API Response Status: ${response.statusCode}');
-      print('Motel Details API Response Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-
-        if (data['success'] == true && data['data'] != null) {
-          return BnbMotelsDetailsModel.fromJson(data['data']);
-        } else {
-          throw Exception('Failed to parse motel details data');
-        }
-      } else {
-        throw Exception(
-          'Failed to fetch motel details: ${response.statusCode}',
-        );
-      }
-    } catch (e) {
-      print('Error fetching motel details: $e');
+    if (response['success'] == true && response['data'] != null) {
+      return BnbMotelsDetailsModel.fromJson(response['data']);
+    } else {
       return null;
     }
   }
@@ -225,41 +205,29 @@ class MotelDetailService {
     int motelId, {
     int page = 1,
     int limit = 5,
+    BuildContext? context,
   }) async {
-    try {
-      String url = '$baseUrl/motels/$motelId/images?page=$page&limit=$limit';
+    debugPrint('Fetching motel images for: $motelId');
 
-      print('Fetching motel images from: $url');
+    final queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+    final response = await ApiClient.get(
+      '/motels/$motelId/images',
+      context: context,
+      queryParams: queryParams,
+    );
 
-      print('Motel Images API Response Status: ${response.statusCode}');
-      print('Motel Images API Response Body: ${response.body}');
+    debugPrint('Motel Images Response: $response');
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-
-        if (data['success'] == true && data['data'] != null) {
-          List<dynamic> imagesJson = data['data'];
-          return imagesJson
-              .map((imageJson) => BnbImageModel.fromJson(imageJson))
-              .toList();
-        } else {
-          throw Exception('Failed to parse motel images data');
-        }
-      } else {
-        throw Exception('Failed to fetch motel images: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching motel images: $e');
+    if (response['success'] == true && response['data'] != null) {
+      List<dynamic> imagesJson = response['data'];
+      return imagesJson
+          .map((imageJson) => BnbImageModel.fromJson(imageJson))
+          .toList();
+    } else {
       return [];
     }
   }
@@ -269,84 +237,52 @@ class MotelDetailService {
     int motelId, {
     int page = 1,
     int limit = 10,
+    BuildContext? context,
   }) async {
-    try {
-      String url =
-          '$baseUrl/user/motels/$motelId/images?page=$page&limit=$limit';
+    debugPrint('Fetching paging motel images for: $motelId');
 
-      debugPrint('Fetching motel images: $url');
+    final queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
 
-      // Get the authentication token
+    final response = await ApiClient.get(
+      '/user/motels/$motelId/images',
+      context: context,
+      queryParams: queryParams,
+    );
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(const Duration(seconds: 30));
-
-      debugPrint('Motel Images API Response Status: ${response.statusCode}');
-      debugPrint('Motel Images API Response Body: ${response.body}');
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        return data;
-      } else {
-        final Map<String, dynamic> errorData = json.decode(response.body);
-        return {
-          'success': false,
-          'message': errorData['message'] ?? 'Failed to fetch images',
-        };
-      }
-    } catch (e) {
-      debugPrint('Error fetching motel images: $e');
-      return {'success': false, 'message': 'Network error: $e'};
-    }
+    debugPrint('Paging Motel Images Response: $response');
+    return response;
   }
 
   static Future<List<BnbAmenityModel>> getMotelAmenities(
     int motelId, {
     int page = 1,
     int limit = 10,
+    BuildContext? context,
   }) async {
-    try {
-      String url = '$baseUrl/motels/$motelId/amenities?page=$page&limit=$limit';
+    debugPrint('Fetching motel amenities for: $motelId');
 
-      print('Fetching motel amenities from: $url');
+    final queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+    final response = await ApiClient.get(
+      '/motels/$motelId/amenities',
+      context: context,
+      queryParams: queryParams,
+    );
 
-      print('Motel Amenities API Response Status: ${response.statusCode}');
-      print('Motel Amenities API Response Body: ${response.body}');
+    debugPrint('Motel Amenities Response: $response');
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-
-        if (data['success'] == true && data['data'] != null) {
-          List<dynamic> amenitiesJson = data['data'];
-          return amenitiesJson
-              .map((amenityJson) => BnbAmenityModel.fromJson(amenityJson))
-              .toList();
-        } else {
-          throw Exception('Failed to parse motel amenities data');
-        }
-      } else {
-        throw Exception(
-          'Failed to fetch motel amenities: ${response.statusCode}',
-        );
-      }
-    } catch (e) {
-      print('Error fetching motel amenities: $e');
+    if (response['success'] == true && response['data'] != null) {
+      List<dynamic> amenitiesJson = response['data'];
+      return amenitiesJson
+          .map((amenityJson) => BnbAmenityModel.fromJson(amenityJson))
+          .toList();
+    } else {
       return [];
     }
   }

@@ -315,10 +315,10 @@ class AppLocalizationsSw extends AppLocalizations {
   String get timeAgoJustNow => 'Sasa hivi';
 
   @override
-  String get homeWelcomeTitle => 'Karibu Tanzania BnB';
+  String get homeWelcomeTitle => 'Karibu Kwa FBC';
 
   @override
-  String get homeWelcomeSubtitle => 'Gundua malazi ya kuvutia';
+  String get homeWelcomeSubtitle => 'Tabasamu lako, tabasamu letu.';
 
   @override
   String get homeAccommodationTypeTitle => 'Aina ya Malazi';
@@ -348,7 +348,7 @@ class AppLocalizationsSw extends AppLocalizations {
   String get homeNoDataTitle => 'Hakuna data. Gusa upya kujaribu tena.';
 
   @override
-  String get favoritePageTitle => 'Vipendwa';
+  String get favoritePageTitle => 'Vipendwa Vyako';
 
   @override
   String get favoriteEmptyTitle => 'Bado hakuna vipendwa';
@@ -358,7 +358,7 @@ class AppLocalizationsSw extends AppLocalizations {
       'Gonga ikoni ya moyo kwenye malazi uyapendayo ili kuyaokoa kwa baadaye.';
 
   @override
-  String get loginTitle => 'Tanzania BnB';
+  String get loginTitle => 'BnB';
 
   @override
   String get loginSubtitle => 'Mlango wako wa malazi halisi';

@@ -1,6 +1,5 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'bnbconnection.dart';
+import 'package:bnbfrontendflutter/services/api_client.dart';
+import 'package:flutter/material.dart';
 
 class NearMeService {
   static Future<Map<String, dynamic>> getNearMeMotels({
@@ -9,45 +8,34 @@ class NearMeService {
     double radius = 10.0, // Default 10km radius
     int page = 1,
     int limit = 10,
+    BuildContext? context,
   }) async {
-    try {
-      String url =
-          '$baseUrl/near-me/motels?latitude=$latitude&longitude=$longitude&radius=$radius&page=$page&limit=$limit';
+    debugPrint('Fetching near me motels');
 
-      print('Fetching near me motels from: $url');
+    final queryParams = {
+      'latitude': latitude.toString(),
+      'longitude': longitude.toString(),
+      'radius': radius.toString(),
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+    final response = await ApiClient.get(
+      '/near-me/motels',
+      context: context,
+      queryParams: queryParams,
+    );
 
-      print('Near Me Motels API Response Status: ${response.statusCode}');
+    debugPrint('Near Me Motels Response: $response');
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        if (data['success'] == true && data['data'] != null) {
-          // Construct full image URLs for each motel
-          return data;
-        } else {
-          throw Exception('Failed to parse near me motels data');
-        }
-      } else {
-        throw Exception(
-          'Failed to fetch near me motels: ${response.statusCode}',
-        );
-      }
-    } catch (e) {
-      print('Error fetching near me motels: $e');
+    if (response['success'] == true && response['data'] != null) {
+      return response;
+    } else {
       return {
         'success': false,
         'data': [],
         'pagination': {},
-        'message': 'Failed to fetch near me motels',
+        'message': response['message'] ?? 'Failed to fetch near me motels',
       };
     }
   }
@@ -55,44 +43,31 @@ class NearMeService {
   static Future<Map<String, dynamic>> getTopSearchedMotels({
     int page = 1,
     int limit = 10,
+    BuildContext? context,
   }) async {
-    try {
-      String url = '$baseUrl/top-searched/motels?page=$page&limit=$limit';
+    debugPrint('Fetching top searched motels');
 
-      print('Fetching top searched motels from: $url');
+    final queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+    final response = await ApiClient.get(
+      '/top-searched/motels',
+      context: context,
+      queryParams: queryParams,
+    );
 
-      print('Top Searched Motels API Response Status: ${response.statusCode}');
+    debugPrint('Top Searched Motels Response: $response');
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        if (data['success'] == true && data['data'] != null) {
-          // Construct full image URLs for each motel
-          return data;
-        } else {
-          throw Exception('Failed to parse top searched motels data');
-        }
-      } else {
-        throw Exception(
-          'Failed to fetch top searched motels: ${response.statusCode}',
-        );
-      }
-    } catch (e) {
-      print('Error fetching top searched motels: $e');
+    if (response['success'] == true && response['data'] != null) {
+      return response;
+    } else {
       return {
         'success': false,
         'data': [],
         'pagination': {},
-        'message': 'Failed to fetch top searched motels',
+        'message': response['message'] ?? 'Failed to fetch top searched motels',
       };
     }
   }
@@ -100,44 +75,31 @@ class NearMeService {
   static Future<Map<String, dynamic>> getNewestMotels({
     int page = 1,
     int limit = 10,
+    BuildContext? context,
   }) async {
-    try {
-      String url = '$baseUrl/newest/motels?page=$page&limit=$limit';
+    debugPrint('Fetching newest motels');
 
-      print('Fetching newest motels from: $url');
+    final queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+    final response = await ApiClient.get(
+      '/newest/motels',
+      context: context,
+      queryParams: queryParams,
+    );
 
-      print('Newest Motels API Response Status: ${response.statusCode}');
+    debugPrint('Newest Motels Response: $response');
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        if (data['success'] == true && data['data'] != null) {
-          // Construct full image URLs for each motel
-          return data;
-        } else {
-          throw Exception('Failed to parse newest motels data');
-        }
-      } else {
-        throw Exception(
-          'Failed to fetch newest motels: ${response.statusCode}',
-        );
-      }
-    } catch (e) {
-      print('Error fetching newest motels: $e');
+    if (response['success'] == true && response['data'] != null) {
+      return response;
+    } else {
       return {
         'success': false,
         'data': [],
         'pagination': {},
-        'message': 'Failed to fetch newest motels',
+        'message': response['message'] ?? 'Failed to fetch newest motels',
       };
     }
   }

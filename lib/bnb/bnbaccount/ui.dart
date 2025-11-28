@@ -1,5 +1,6 @@
 import 'package:bnbfrontendflutter/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfileHeader extends StatelessWidget {
   final String? username;
@@ -43,15 +44,54 @@ class ProfileHeader extends StatelessWidget {
               // Profile Image
               GestureDetector(
                 onTap: onAvatarTap,
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.grey.shade200,
-                  backgroundImage: profileImageUrl != null
-                      ? NetworkImage(profileImageUrl!)
-                      : null,
-                  child: profileImageUrl == null
-                      ? const Icon(Icons.person, size: 50, color: Colors.grey)
-                      : null,
+                child: Center(
+                  child: profileImageUrl != null
+                      ? ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: profileImageUrl!,
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              width: 120,
+                              height: 120,
+                              alignment: Alignment.center,
+                              child: const SizedBox(
+                                width: 120, // Diameter = radius * 2
+                                height: 120,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 4, // Optional: adjust thickness
+                                ),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => CircleAvatar(
+                              radius: 60,
+                              backgroundColor: Theme.of(context).primaryColor,
+                              child: Text(
+                                username?.isNotEmpty ?? false
+                                    ? username![0].toUpperCase()
+                                    : '',
+                                style: const TextStyle(
+                                  fontSize: 50,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      : CircleAvatar(
+                          radius: 60,
+                          backgroundColor: Theme.of(context).primaryColor,
+                          child: Text(
+                            username?.isNotEmpty ?? false
+                                ? username![0].toUpperCase()
+                                : '',
+                            style: const TextStyle(
+                              fontSize: 50,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
                 ),
               ),
 

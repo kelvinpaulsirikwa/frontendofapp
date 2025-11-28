@@ -1,125 +1,143 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:bnbfrontendflutter/services/api_client.dart';
 import 'package:bnbfrontendflutter/models/bnbmodel.dart';
-import 'bnbconnection.dart';
+import 'package:flutter/material.dart';
 
 enum MotelSortBy { name, motel_type, district }
 
 enum MotelSortOrder { asc, desc }
 
 class SimpleMotelService {
-  static Future<List<SimpleMotel>> getMotels({
+  static Future<Map<String, dynamic>> getMotels({
     String? search,
     int? regionId,
     int? districtId,
     int? motelTypeId,
     MotelSortBy sortBy = MotelSortBy.name,
     MotelSortOrder sortOrder = MotelSortOrder.asc,
+    int? page,
+    int? limit,
+    double? latitude,
+    double? longitude,
+    BuildContext? context,
   }) async {
-    try {
-      String url = '$baseUrl/motels';
-      List<String> queryParams = [];
+    debugPrint('Fetching motels');
 
-      if (search != null && search.isNotEmpty) {
-        queryParams.add('search=$search');
+    Map<String, String> queryParams = {};
+
+    if (search != null && search.isNotEmpty) {
+      queryParams['search'] = search;
+    }
+    if (regionId != null && regionId > 0) {
+      queryParams['region_id'] = regionId.toString();
+    }
+    if (districtId != null && districtId > 0) {
+      queryParams['district_id'] = districtId.toString();
+    }
+    if (motelTypeId != null && motelTypeId > 0) {
+      queryParams['motel_type_id'] = motelTypeId.toString();
+    }
+
+    // Add sorting parameters
+    queryParams['sort_by'] = sortBy.name;
+    queryParams['sort_order'] = sortOrder.name;
+
+    // Add pagination parameters
+    if (page != null && page > 0) {
+      queryParams['page'] = page.toString();
+    }
+    if (limit != null && limit > 0) {
+      queryParams['limit'] = limit.toString();
+    }
+
+    // Add location parameters for distance-based sorting
+    if (latitude != null && longitude != null) {
+      queryParams['latitude'] = latitude.toString();
+      queryParams['longitude'] = longitude.toString();
+    }
+
+    final response = await ApiClient.get(
+      '/motels',
+      context: context,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
+    );
+
+    debugPrint('Motels Response: $response');
+
+    // Check if unauthorized - return empty result (ApiClient handles logout)
+    if (response['unauthorized'] == true) {
+      return {
+        'motels': <SimpleMotel>[],
+        'pagination': <String, dynamic>{},
+        'success': false,
+        'unauthorized': true,
+      };
+    }
+
+    if (response['success'] == true && response['data'] != null) {
+      List<dynamic> motelsJson = response['data'];
+      List<SimpleMotel> motels = motelsJson
+          .map((motelJson) => SimpleMotel.fromJson(motelJson))
+          .toList();
+
+      // Safely cast pagination
+      Map<String, dynamic> pagination = {};
+      if (response['pagination'] != null) {
+        pagination = Map<String, dynamic>.from(response['pagination']);
       }
-      if (regionId != null && regionId > 0) {
-        queryParams.add('region_id=$regionId');
-      }
-      if (districtId != null && districtId > 0) {
-        queryParams.add('district_id=$districtId');
-      }
-      if (motelTypeId != null && motelTypeId > 0) {
-        queryParams.add('motel_type_id=$motelTypeId');
-      }
 
-      // Add sorting parameters
-      String sortByString = sortBy.name;
-      String sortOrderString = sortOrder.name;
-      queryParams.add('sort_by=$sortByString');
-      queryParams.add('sort_order=$sortOrderString');
-
-      if (queryParams.isNotEmpty) {
-        url += '?${queryParams.join('&')}';
-      }
-
-      print('Fetching motels from: $url');
-
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
-
-      print('Motels API Response Status: ${response.statusCode}');
-      print('Motels API Response Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-
-        if (data['success'] == true && data['data'] != null) {
-          List<dynamic> motelsJson = data['data'];
-          List<SimpleMotel> motels = motelsJson
-              .map((motelJson) => SimpleMotel.fromJson(motelJson))
-              .toList();
-
-          return motels;
-        } else {
-          throw Exception('Failed to parse motels data');
-        }
-      } else {
-        throw Exception('Failed to fetch motels: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching motels: $e');
-      // Return empty list if API fails
-      return [];
+      return {
+        'motels': motels,
+        'pagination': pagination,
+        'success': true,
+      };
+    } else {
+      return {
+        'motels': <SimpleMotel>[],
+        'pagination': <String, dynamic>{},
+        'success': false,
+        'error': response['message'] ?? 'Failed to fetch motels',
+      };
     }
   }
 
-  static Future<List<SimpleMotel>> getFeaturedMotels() async {
-    try {
-      String url = '$baseUrl/motels/featured';
+  static Future<List<SimpleMotel>> getFeaturedMotels({
+    double? latitude,
+    double? longitude,
+    BuildContext? context,
+  }) async {
+    debugPrint('Fetching featured motels');
 
-      print('Fetching featured motels from: $url');
+    Map<String, String>? queryParams;
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+    // Add location parameters for distance-based sorting
+    if (latitude != null && longitude != null) {
+      queryParams = {
+        'latitude': latitude.toString(),
+        'longitude': longitude.toString(),
+      };
+    }
 
-      print('Featured Motels API Response Status: ${response.statusCode}');
-      print('Featured Motels API Response Body: ${response.body}');
+    final response = await ApiClient.get(
+      '/motels/featured',
+      context: context,
+      queryParams: queryParams,
+    );
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
+    debugPrint('Featured Motels Response: $response');
 
-        if (data['success'] == true && data['data'] != null) {
-          List<dynamic> motelsJson = data['data'];
-          List<SimpleMotel> motels = motelsJson
-              .map((motelJson) => SimpleMotel.fromJson(motelJson))
-              .toList();
+    // Check if unauthorized - return empty result (ApiClient handles logout)
+    if (response['unauthorized'] == true) {
+      return [];
+    }
 
-          return motels;
-        } else {
-          throw Exception('Failed to parse featured motels data');
-        }
-      } else {
-        throw Exception(
-          'Failed to fetch featured motels: ${response.statusCode}',
-        );
-      }
-    } catch (e) {
-      print('Error fetching featured motels: $e');
+    if (response['success'] == true && response['data'] != null) {
+      List<dynamic> motelsJson = response['data'];
+      List<SimpleMotel> motels = motelsJson
+          .map((motelJson) => SimpleMotel.fromJson(motelJson))
+          .toList();
+
+      return motels;
+    } else {
       // Return empty list if API fails
       return [];
     }
@@ -191,80 +209,60 @@ class SimpleMotelService {
     };
   }
 
-  static Future<List<SimpleMotel>> getFeaturedForUI() async {
+  static Future<List<SimpleMotel>> getFeaturedForUI({
+    double? latitude,
+    double? longitude,
+    BuildContext? context,
+  }) async {
     try {
-      List<SimpleMotel> featuredMotels = await getFeaturedMotels();
-      return featuredMotels;
+      List<SimpleMotel> featuredMotels = await getFeaturedMotels(
+        latitude: latitude,
+        longitude: longitude,
+        context: context,
+      );
+      // Limit to 10 items for "Near By" section
+      return featuredMotels.take(10).toList();
     } catch (e) {
-      print('Error getting featured motels for UI: $e');
-      // Return default featured data if API fails
-      return [
-        SimpleMotel(
-          id: 1,
-          name: 'Bahari Beach Lodge',
-          frontImage: null,
-          streetAddress: 'Beach Road',
-          motelType: 'Beach Resort',
-          district: 'Zanzibar',
-          longitude: 39.123456,
-          latitude: -6.123456,
-        ),
-        SimpleMotel(
-          id: 2,
-          name: 'Kilimanjaro View Hotel',
-          frontImage: null,
-          streetAddress: 'Mountain View',
-          motelType: 'Mountain Lodge',
-          district: 'Kilimanjaro',
-          longitude: 37.123456,
-          latitude: -3.123456,
-        ),
-      ];
+      debugPrint('Error getting featured motels for UI: $e');
+      // Return empty list if API fails
+      return [];
     }
   }
 
-  static Future<List<SimpleMotel>> getPopularForUI() async {
+  static Future<Map<String, dynamic>> getPopularForUI({
+    int page = 1,
+    int limit = 10,
+    double? latitude,
+    double? longitude,
+    String? search,
+    int? regionId,
+    int? districtId,
+    int? motelTypeId,
+    BuildContext? context,
+  }) async {
     try {
-      List<SimpleMotel> popularMotels = await getMotels(
-        sortBy: MotelSortBy.name,
+      final result = await getMotels(
+        search: search,
+        regionId: regionId,
+        districtId: districtId,
+        motelTypeId: motelTypeId,
+        sortBy: MotelSortBy.motel_type,
         sortOrder: MotelSortOrder.asc,
+        page: page,
+        limit: limit,
+        latitude: latitude,
+        longitude: longitude,
+        context: context,
       );
-      return popularMotels.take(5).toList();
+      return result;
     } catch (e) {
-      print('Error getting popular motels for UI: $e');
-      // Return default popular data if API fails
-      return [
-        SimpleMotel(
-          id: 3,
-          name: 'Serengeti Safari Camp',
-          frontImage: null,
-          streetAddress: 'National Park Road',
-          motelType: 'Lodge',
-          district: 'Serengeti',
-          longitude: 34.123456,
-          latitude: -2.123456,
-        ),
-        SimpleMotel(
-          id: 4,
-          name: 'Stone Town Heritage',
-          frontImage: null,
-          streetAddress: 'Stone Town Street',
-          motelType: 'Hotel',
-          district: 'Zanzibar',
-          longitude: 39.123456,
-          latitude: -6.123456,
-        ),
-        SimpleMotel(
-          id: 5,
-          name: 'Mikumi Bush Camp',
-          frontImage: null,
-          streetAddress: 'Park Entrance',
-          motelType: 'Camp',
-          district: 'Mikumi',
-          longitude: 36.123456,
-          latitude: -7.123456,
-        ),
-      ];
+      debugPrint('Error getting popular motels for UI: $e');
+      return {
+        'motels': <SimpleMotel>[],
+        'pagination': <String, dynamic>{},
+        'success': false,
+        'error': e.toString(),
+      };
     }
   }
 }

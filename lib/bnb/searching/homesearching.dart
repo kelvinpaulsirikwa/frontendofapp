@@ -1,8 +1,14 @@
+import 'package:bnbfrontendflutter/bnb/reusablecomponent/layout.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
 import 'package:bnbfrontendflutter/services/search_service.dart';
+import 'package:bnbfrontendflutter/services/location_service.dart';
+import 'package:bnbfrontendflutter/utility/componet.dart';
+import 'package:bnbfrontendflutter/utility/images.dart';
 import 'package:bnbfrontendflutter/utility/navigateutility.dart';
+import 'package:bnbfrontendflutter/utility/distance_calculator.dart';
 import 'package:bnbfrontendflutter/bnb/bnbhome/bnbdetails.dart';
 import 'package:bnbfrontendflutter/models/bnbmodel.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 
 class HomeSearching extends StatefulWidget {
@@ -33,6 +39,8 @@ class _HomeSearchingState extends State<HomeSearching> {
   bool _isLoadingMore = false;
   int _totalResults = 0;
   final ScrollController _scrollController = ScrollController();
+  bool _isInfoExpanded = false;
+  Position? _currentPosition;
 
   // Sort options
   final List<String> _sortOptions = ['All', 'Top Searched', 'New Listings'];
@@ -44,6 +52,45 @@ class _HomeSearchingState extends State<HomeSearching> {
     _searchMotels();
     _scrollController.addListener(_onScroll);
     _searchController.addListener(_onSearchChanged);
+    _getCurrentLocation();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    final position = await LocationService.getCurrentLocation();
+    if (mounted) {
+      setState(() {
+        _currentPosition = position;
+      });
+    }
+  }
+
+  String _getDistanceText(Map<String, dynamic> hotel) {
+    if (_currentPosition == null ||
+        hotel['latitude'] == null ||
+        hotel['longitude'] == null) {
+      return '';
+    }
+
+    try {
+      final hotelLat = double.tryParse(hotel['latitude'].toString());
+      final hotelLon = double.tryParse(hotel['longitude'].toString());
+
+      if (hotelLat == null || hotelLon == null) {
+        return '';
+      }
+
+      final distance = DistanceCalculator.calculateDistance(
+        _currentPosition!.latitude,
+        _currentPosition!.longitude,
+        hotelLat,
+        hotelLon,
+      );
+
+      return DistanceCalculator.formatDistance(distance);
+    } catch (e) {
+      print('Error calculating distance: $e');
+      return '';
+    }
   }
 
   @override
@@ -64,7 +111,7 @@ class _HomeSearchingState extends State<HomeSearching> {
 
   void _onSearchChanged() {
     // Debounce search to avoid too many API calls
-    Future.delayed(Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         _currentPage = 1;
         _searchResults.clear();
@@ -185,6 +232,7 @@ class _HomeSearchingState extends State<HomeSearching> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: KivuliAppBar(),
       backgroundColor: warmSand,
       body: SafeArea(
         child: Column(
@@ -199,30 +247,22 @@ class _HomeSearchingState extends State<HomeSearching> {
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                padding: const EdgeInsets.fromLTRB(10, 16, 20, 16),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.2),
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back,
-                          color: softCream,
-                          size: 20,
-                        ),
-                      ),
+                    IconContainer(
+                      icon: Icons.arrow_back,
+                      backgroundColor: softCream,
+                      iconColor: richBrown,
+                      onTap: () {
+                        NavigationUtil.pop(context);
+                      },
                     ),
-                    const SizedBox(width: 16),
+
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Container(
+                        height: 36,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         decoration: BoxDecoration(
                           color: softCream,
@@ -253,15 +293,14 @@ class _HomeSearchingState extends State<HomeSearching> {
                                   fontWeight: FontWeight.w500,
                                 ),
                                 decoration: const InputDecoration(
-                                  hintText: 'Search accommodations...',
+                                  hintText: 'Search by Name...',
                                   hintStyle: TextStyle(
                                     color: textLight,
                                     fontSize: 13,
                                   ),
                                   border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(
-                                    vertical: 14,
-                                  ),
+                                  contentPadding: EdgeInsets.zero,
+                                  isDense: true,
                                 ),
                               ),
                             ),
@@ -282,31 +321,16 @@ class _HomeSearchingState extends State<HomeSearching> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    GestureDetector(
+                    const SizedBox(width: 8),
+                    IconContainer(
+                      icon: Icons.sort,
+                      backgroundColor: softCream,
+                      iconColor: richBrown,
                       onTap: () {
-                        // Navigate to account/profile
+                        setState(() {
+                          _isInfoExpanded = !_isInfoExpanded;
+                        });
                       },
-                      child: Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
-                            width: 2,
-                          ),
-                        ),
-                        child: const CircleAvatar(
-                          radius: 18,
-                          backgroundColor: softCream,
-                          child: Icon(
-                            Icons.person,
-                            color: deepTerracotta,
-                            size: 20,
-                          ),
-                        ),
-                      ),
                     ),
                   ],
                 ),
@@ -372,236 +396,240 @@ class _HomeSearchingState extends State<HomeSearching> {
               ),
             ),
 
-            // Filter chips section
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Amenities filter
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.checkroom_outlined,
-                        size: 16,
-                        color: earthGreen,
-                      ),
-                      const SizedBox(width: 6),
-                      const Text(
-                        'Amenities',
-                        style: TextStyle(
-                          color: textDark,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
+            // Filter chips section - Show/Hide based on _isInfoExpanded
+            if (_isInfoExpanded)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Amenities filter
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.checkroom_outlined,
+                          size: 16,
+                          color: earthGreen,
                         ),
-                      ),
-                      const Spacer(),
-                      if (_selectedAmenities.isNotEmpty)
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedAmenities.clear();
-                            });
-                          },
-                          child: const Text(
-                            'Clear',
-                            style: TextStyle(
-                              color: deepTerracotta,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        const SizedBox(width: 6),
+                        const Text(
+                          'Amenities',
+                          style: TextStyle(
+                            color: textDark,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    height: 36,
-                    child: _isLoadingFilters
-                        ? Center(child: CircularProgressIndicator())
-                        : ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: _availableAmenities.length,
-                            itemBuilder: (context, index) {
-                              final amenity = _availableAmenities[index];
-                              final amenityName = amenity['name'] ?? '';
-                              final isSelected = _selectedAmenities.contains(
-                                amenityName,
-                              );
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    if (isSelected) {
-                                      _selectedAmenities.remove(amenityName);
-                                    } else {
-                                      _selectedAmenities.add(amenityName);
-                                    }
-                                  });
-                                  _onFilterChanged();
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.only(right: 8),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? earthGreen
-                                        : Colors.white,
-                                    borderRadius: BorderRadius.circular(18),
-                                    border: Border.all(
+                        const Spacer(),
+                        if (_selectedAmenities.isNotEmpty)
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedAmenities.clear();
+                              });
+                            },
+                            child: const Text(
+                              'Clear',
+                              style: TextStyle(
+                                color: deepTerracotta,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 36,
+                      child: _isLoadingFilters
+                          ? const Center(child: CircularProgressIndicator())
+                          : ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: _availableAmenities.length,
+                              itemBuilder: (context, index) {
+                                final amenity = _availableAmenities[index];
+                                final amenityName = amenity['name'] ?? '';
+                                final isSelected = _selectedAmenities.contains(
+                                  amenityName,
+                                );
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      if (isSelected) {
+                                        _selectedAmenities.remove(amenityName);
+                                      } else {
+                                        _selectedAmenities.add(amenityName);
+                                      }
+                                    });
+                                    _onFilterChanged();
+                                  },
+                                  child: Container(
+                                    margin: const EdgeInsets.only(right: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
                                       color: isSelected
                                           ? earthGreen
-                                          : Colors.grey.shade300,
-                                      width: 1,
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(18),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? earthGreen
+                                            : Colors.grey.shade300,
+                                        width: 1,
+                                      ),
                                     ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (isSelected)
-                                        const Padding(
-                                          padding: EdgeInsets.only(right: 6),
-                                          child: Icon(
-                                            Icons.check,
-                                            size: 14,
-                                            color: softCream,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (isSelected)
+                                          const Padding(
+                                            padding: EdgeInsets.only(right: 6),
+                                            child: Icon(
+                                              Icons.check,
+                                              size: 14,
+                                              color: softCream,
+                                            ),
+                                          ),
+                                        Text(
+                                          amenityName,
+                                          style: TextStyle(
+                                            color: isSelected
+                                                ? softCream
+                                                : Colors.grey.shade700,
+                                            fontSize: 12,
+                                            fontWeight: isSelected
+                                                ? FontWeight.w600
+                                                : FontWeight.w500,
                                           ),
                                         ),
-                                      Text(
-                                        amenityName,
-                                        style: TextStyle(
-                                          color: isSelected
-                                              ? softCream
-                                              : Colors.grey.shade700,
-                                          fontSize: 12,
-                                          fontWeight: isSelected
-                                              ? FontWeight.w600
-                                              : FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
-                  ),
-                  const SizedBox(height: 12),
-                  // Regions filter
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.location_on_outlined,
-                        size: 16,
-                        color: sunsetOrange,
-                      ),
-                      const SizedBox(width: 6),
-                      const Text(
-                        'Regions',
-                        style: TextStyle(
-                          color: textDark,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
+                                );
+                              },
+                            ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Regions filter
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 16,
+                          color: sunsetOrange,
                         ),
-                      ),
-                      const Spacer(),
-                      if (_selectedRegions.isNotEmpty)
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedRegions.clear();
-                            });
-                          },
-                          child: const Text(
-                            'Clear',
-                            style: TextStyle(
-                              color: deepTerracotta,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
+                        const SizedBox(width: 6),
+                        const Text(
+                          'Regions',
+                          style: TextStyle(
+                            color: textDark,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const Spacer(),
+                        if (_selectedRegions.isNotEmpty)
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedRegions.clear();
+                              });
+                            },
+                            child: const Text(
+                              'Clear',
+                              style: TextStyle(
+                                color: deepTerracotta,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    height: 36,
-                    child: _isLoadingFilters
-                        ? Center(child: CircularProgressIndicator())
-                        : ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: _availableRegions.length,
-                            itemBuilder: (context, index) {
-                              final region = _availableRegions[index];
-                              final regionName = region['name'] ?? '';
-                              final isSelected = _selectedRegions.contains(
-                                regionName,
-                              );
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    if (isSelected) {
-                                      _selectedRegions.remove(regionName);
-                                    } else {
-                                      _selectedRegions.add(regionName);
-                                    }
-                                  });
-                                  _onFilterChanged();
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.only(right: 8),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? sunsetOrange
-                                        : Colors.white,
-                                    borderRadius: BorderRadius.circular(18),
-                                    border: Border.all(
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 36,
+                      child: _isLoadingFilters
+                          ? const Center(child: CircularProgressIndicator())
+                          : ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: _availableRegions.length,
+                              itemBuilder: (context, index) {
+                                final region = _availableRegions[index];
+                                final regionName = region['name'] ?? '';
+                                final isSelected = _selectedRegions.contains(
+                                  regionName,
+                                );
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      if (isSelected) {
+                                        _selectedRegions.remove(regionName);
+                                      } else {
+                                        _selectedRegions.add(regionName);
+                                      }
+                                    });
+                                    _onFilterChanged();
+                                  },
+                                  child: Container(
+                                    margin: const EdgeInsets.only(right: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
                                       color: isSelected
                                           ? sunsetOrange
-                                          : Colors.grey.shade300,
-                                      width: 1,
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(18),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? sunsetOrange
+                                            : Colors.grey.shade300,
+                                        width: 1,
+                                      ),
                                     ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (isSelected)
-                                        const Padding(
-                                          padding: EdgeInsets.only(right: 6),
-                                          child: Icon(
-                                            Icons.check,
-                                            size: 14,
-                                            color: softCream,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (isSelected)
+                                          const Padding(
+                                            padding: EdgeInsets.only(right: 6),
+                                            child: Icon(
+                                              Icons.check,
+                                              size: 14,
+                                              color: softCream,
+                                            ),
+                                          ),
+                                        Text(
+                                          regionName,
+                                          style: TextStyle(
+                                            color: isSelected
+                                                ? softCream
+                                                : Colors.grey.shade700,
+                                            fontSize: 12,
+                                            fontWeight: isSelected
+                                                ? FontWeight.w600
+                                                : FontWeight.w500,
                                           ),
                                         ),
-                                      Text(
-                                        regionName,
-                                        style: TextStyle(
-                                          color: isSelected
-                                              ? softCream
-                                              : Colors.grey.shade700,
-                                          fontSize: 12,
-                                          fontWeight: isSelected
-                                              ? FontWeight.w600
-                                              : FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
-                  ),
-                ],
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
               ),
-            ),
 
             // Divider
             Container(height: 1, color: Colors.grey.shade200),
@@ -668,7 +696,7 @@ class _HomeSearchingState extends State<HomeSearching> {
             // Results list - Play Store style
             Expanded(
               child: _isLoading && _searchResults.isEmpty
-                  ? Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator())
                   : _searchResults.isEmpty
                   ? Center(
                       child: Column(
@@ -714,7 +742,7 @@ class _HomeSearchingState extends State<HomeSearching> {
                             child: Column(
                               children: [
                                 if (_isLoadingMore)
-                                  CircularProgressIndicator()
+                                  const CircularProgressIndicator()
                                 else if (_hasMore)
                                   Column(
                                     children: [
@@ -764,258 +792,244 @@ class _HomeSearchingState extends State<HomeSearching> {
                           );
                         }
                         final hotel = _searchResults[index];
-                        return GestureDetector(
-                          onTap: () {
-                            // Convert search result to SimpleMotel and navigate to details
-                            final simpleMotel = SimpleMotel(
-                              id: hotel['id'] ?? 0,
-                              name: hotel['name'] ?? 'Unknown Motel',
-                              frontImage: hotel['front_image'],
-                              streetAddress:
-                                  hotel['street_address'] ?? 'Unknown Street',
-                              motelType: hotel['type'] ?? 'Unknown Type',
-                              district: hotel['location'] ?? 'Unknown District',
-                              longitude: hotel['longitude'] != null
-                                  ? double.tryParse(
-                                      hotel['longitude'].toString(),
-                                    )
-                                  : null,
-                              latitude: hotel['latitude'] != null
-                                  ? double.tryParse(
-                                      hotel['latitude'].toString(),
-                                    )
-                                  : null,
-                            );
+                        return Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              // Convert search result to SimpleMotel and navigate to details
+                              final simpleMotel = SimpleMotel(
+                                id: hotel['id'] ?? 0,
+                                name: hotel['name'] ?? 'Unknown Motel',
+                                frontImage: hotel['front_image'],
+                                streetAddress:
+                                    hotel['street_address'] ?? 'Unknown Street',
+                                motelType: hotel['type'] ?? 'Unknown Type',
+                                district:
+                                    hotel['location'] ?? 'Unknown District',
+                                longitude: hotel['longitude'] != null
+                                    ? double.tryParse(
+                                        hotel['longitude'].toString(),
+                                      )
+                                    : null,
+                                latitude: hotel['latitude'] != null
+                                    ? double.tryParse(
+                                        hotel['latitude'].toString(),
+                                      )
+                                    : null,
+                              );
 
-                            NavigationUtil.pushTo(
-                              context,
-                              BnBDetails(motel: simpleMotel),
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Image placeholder
-                                Container(
-                                  width: 80,
-                                  height: 80,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        earthGreen.withOpacity(0.3),
-                                        sunsetOrange.withOpacity(0.3),
+                              NavigationUtil.pushTo(
+                                context,
+                                BnBDetails(motel: simpleMotel),
+                              );
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Image placeholder
+                                  Container(
+                                    width: 80,
+                                    height: 80,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          earthGreen.withOpacity(0.3),
+                                          sunsetOrange.withOpacity(0.3),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: richBrown.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          child: SizedBox(
+                                            height: double.infinity,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: Showimage.networkImage(
+                                                imageUrl: hotel['front_image']?.toString() ?? '',
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        if (hotel['isNew'] == true)
+                                          Positioned(
+                                            top: 6,
+                                            left: 6,
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 6,
+                                                    vertical: 3,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: sunsetOrange,
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                              child: const Text(
+                                                'NEW',
+                                                style: TextStyle(
+                                                  color: softCream,
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.w800,
+                                                  letterSpacing: 0.5,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
                                       ],
                                     ),
-                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: Stack(
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: richBrown.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        child: Center(
-                                          child: Icon(
-                                            Icons.home_outlined,
-                                            size: 28,
-                                            color: richBrown.withOpacity(0.7),
-                                          ),
-                                        ),
-                                      ),
-                                      if (hotel['isNew'] == true)
-                                        Positioned(
-                                          top: 6,
-                                          left: 6,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 6,
-                                              vertical: 3,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: sunsetOrange,
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                            ),
-                                            child: const Text(
-                                              'NEW',
-                                              style: TextStyle(
-                                                color: softCream,
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.w800,
-                                                letterSpacing: 0.5,
+                                  const SizedBox(width: 14),
+                                  // Content
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                hotel['name'] ?? '',
+                                                style: const TextStyle(
+                                                  color: textDark,
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 14),
-                                // Content
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              hotel['name'] ?? '',
-                                              style: const TextStyle(
-                                                color: textDark,
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w700,
+                                            const SizedBox(width: 8),
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 3,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: earthGreen.withOpacity(
+                                                  0.15,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
                                               ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
+                                              child: Text(
+                                                hotel['type'] ?? '',
+                                                style: const TextStyle(
+                                                  color: earthGreen,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                          const SizedBox(width: 8),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 6),
+                                        // Distance badge - prominent display
+                                        if (_currentPosition != null &&
+                                            hotel['latitude'] != null &&
+                                            hotel['longitude'] != null &&
+                                            _getDistanceText(hotel).isNotEmpty)
                                           Container(
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 8,
-                                              vertical: 3,
+                                              vertical: 4,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: earthGreen.withOpacity(
-                                                0.15,
+                                              color: deepTerracotta.withOpacity(
+                                                0.1,
                                               ),
                                               borderRadius:
                                                   BorderRadius.circular(6),
-                                            ),
-                                            child: Text(
-                                              hotel['badge'] ?? '',
-                                              style: const TextStyle(
-                                                color: earthGreen,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w700,
+                                              border: Border.all(
+                                                color: deepTerracotta
+                                                    .withOpacity(0.3),
+                                                width: 1,
                                               ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        hotel['type'] ?? '',
-                                        style: const TextStyle(
-                                          color: textLight,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 6,
-                                              vertical: 3,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: warmSand,
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                            ),
                                             child: Row(
+                                              mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 const Icon(
-                                                  Icons.star,
-                                                  size: 11,
-                                                  color: sunsetOrange,
+                                                  Icons.directions_sharp,
+                                                  size: 12,
+                                                  color: deepTerracotta,
                                                 ),
-                                                const SizedBox(width: 3),
+                                                const SizedBox(width: 4),
                                                 Text(
-                                                  '${hotel['rating']}',
+                                                  '${_getDistanceText(hotel)} away',
                                                   style: const TextStyle(
-                                                    color: textDark,
+                                                    color: deepTerracotta,
                                                     fontSize: 11,
-                                                    fontWeight: FontWeight.w600,
+                                                    fontWeight: FontWeight.w700,
                                                   ),
                                                 ),
                                               ],
                                             ),
                                           ),
-                                          const SizedBox(width: 8),
-                                          Flexible(
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.reviews_outlined,
-                                                  size: 11,
-                                                  color: textLight.withOpacity(
-                                                    0.7,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 3),
-                                                Flexible(
-                                                  child: Text(
-                                                    '${hotel['reviews']} reviews',
-                                                    style: TextStyle(
-                                                      color: textLight
-                                                          .withOpacity(0.8),
-                                                      fontSize: 11,
-                                                    ),
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                              ],
+                                        const SizedBox(height: 6),
+                                        Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.location_on_outlined,
+                                              size: 12,
+                                              color: textLight,
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.location_on_outlined,
-                                            size: 12,
-                                            color: textLight,
-                                          ),
-                                          const SizedBox(width: 3),
-                                          Expanded(
-                                            child: Text(
-                                              hotel['location'] ?? '',
-                                              style: const TextStyle(
-                                                color: textLight,
-                                                fontSize: 11,
+                                            const SizedBox(width: 3),
+                                            Expanded(
+                                              child: Text(
+                                                hotel['location'] ?? '',
+                                                style: const TextStyle(
+                                                  color: textLight,
+                                                  fontSize: 11,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
                                             ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Action button
+                                  Column(
+                                    children: [
+                                      const SizedBox(height: 4),
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: deepTerracotta,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
                                           ),
-                                        ],
+                                        ),
+                                        child: const Icon(
+                                          Icons.arrow_forward,
+                                          color: softCream,
+                                          size: 16,
+                                        ),
                                       ),
                                     ],
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                // Action button
-                                Column(
-                                  children: [
-                                    const SizedBox(height: 4),
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: deepTerracotta,
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: const Icon(
-                                        Icons.arrow_forward,
-                                        color: softCream,
-                                        size: 16,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         );

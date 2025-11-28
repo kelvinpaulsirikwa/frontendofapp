@@ -3,7 +3,6 @@ import 'package:bnbfrontendflutter/utility/images.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../services/near_me_service.dart';
-import '../../services/location_service.dart';
 import '../../utility/distance_calculator.dart';
 import '../../models/bnbmodel.dart';
 import '../bnbhome/bnbdetails.dart';
@@ -59,9 +58,30 @@ class _NearMeMotelState extends State<NearMeMotel> {
     });
 
     try {
-      // Request location permission
-      bool hasPermission = await LocationService.requestLocationPermission();
-      if (!hasPermission) {
+      // First check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _showLocationServiceDisabledDialog();
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Check and request location permission
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          _showLocationPermissionDialog();
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
         _showLocationPermissionDialog();
         setState(() {
           _isLoading = false;
@@ -69,26 +89,32 @@ class _NearMeMotelState extends State<NearMeMotel> {
         return;
       }
 
-      // Get current location
-      Position? position = await LocationService.getCurrentLocation();
-      if (position != null) {
-        setState(() {
-          _currentPosition = position;
-        });
-        // Notify parent about radius and position
-        if (widget.onRadiusChanged != null) {
-          widget.onRadiusChanged!(_radius, position);
-        }
-        await _loadNearMeMotels();
-      } else {
-        AlertReturn.showerror(context, 'Error getting location');
-        setState(() {
-          _isLoading = false;
-        });
+      // Get current location directly using Geolocator
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      setState(() {
+        _currentPosition = position;
+      });
+
+      // Notify parent about radius and position
+      if (widget.onRadiusChanged != null) {
+        widget.onRadiusChanged!(_radius, position);
       }
+      await _loadNearMeMotels();
     } catch (e) {
       print('Error getting location: $e');
-      AlertReturn.showerror(context, 'Error getting location');
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _showLocationServiceDisabledDialog();
+      } else {
+        AlertReturn.showerror(
+          context,
+          'Error getting location. Please try again.',
+        );
+      }
       setState(() {
         _isLoading = false;
       });
@@ -150,21 +176,114 @@ class _NearMeMotelState extends State<NearMeMotel> {
     }
   }
 
+  void _showLocationServiceDisabledDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: const [
+            Icon(Icons.location_disabled, color: deepTerracotta, size: 28),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Location Services Disabled',
+                style: TextStyle(
+                  color: textDark,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Location services are turned off on your device. Please enable location services in your device settings to discover amazing stays near you.',
+          style: TextStyle(color: textDark, fontSize: 14, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              // Open location settings
+              await Geolocator.openLocationSettings();
+              // Wait a bit for user to enable location, then retry
+              await Future.delayed(const Duration(seconds: 1));
+              _getCurrentLocationAndLoadMotels();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: earthGreen,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            child: const Text(
+              'Open Settings',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _getCurrentLocationAndLoadMotels();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: deepTerracotta,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            child: const Text(
+              'Done',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showLocationPermissionDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
-          children: [
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: const [
             Icon(Icons.location_off, color: deepTerracotta, size: 28),
             SizedBox(width: 12),
-            Text(
-              'Location Required',
-              style: TextStyle(
-                color: textDark,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
+            Expanded(
+              child: Text(
+                'Location Permission Required',
+                style: TextStyle(
+                  color: textDark,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
               ),
             ),
           ],
@@ -198,6 +317,26 @@ class _NearMeMotelState extends State<NearMeMotel> {
             ),
             child: const Text(
               'Retry',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _getCurrentLocationAndLoadMotels();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: deepTerracotta,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            child: const Text(
+              'Done',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -426,12 +565,16 @@ class _NearMeMotelState extends State<NearMeMotel> {
                       onTap: () {
                         final simpleMotel = SimpleMotel(
                           id: motel['id'] ?? 0,
-                          name: motel['name'] ?? 'Unknown Motel',
-                          frontImage: motel['front_image'],
+                          name: motel['name']?.toString() ?? 'Unknown Motel',
+                          frontImage: motel['front_image']?.toString(),
                           streetAddress:
-                              motel['street_address'] ?? 'Unknown Street',
-                          motelType: motel['motel_type'] ?? 'Unknown Type',
-                          district: motel['district'] ?? 'Unknown District',
+                              motel['street_address']?.toString() ??
+                              'Unknown Street',
+                          motelType:
+                              motel['motel_type']?.toString() ?? 'Unknown Type',
+                          district:
+                              motel['district']?.toString() ??
+                              'Unknown District',
                           longitude: motel['longitude'] != null
                               ? double.tryParse(motel['longitude'].toString())
                               : null,
@@ -474,9 +617,38 @@ class _NearMeMotelState extends State<NearMeMotel> {
                                       height: double.infinity,
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(12),
-                                        child: Showimage.networkImage(
-                                          imageUrl: motel['front_image'],
-                                        ),
+                                        child:
+                                            motel['front_image'] != null &&
+                                                motel['front_image']
+                                                    .toString()
+                                                    .isNotEmpty
+                                            ? Showimage.networkImage(
+                                                imageUrl: motel['front_image']
+                                                    .toString(),
+                                              )
+                                            : Container(
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    begin: Alignment.topLeft,
+                                                    end: Alignment.bottomRight,
+                                                    colors: [
+                                                      sunsetOrange.withOpacity(
+                                                        0.4,
+                                                      ),
+                                                      earthGreen.withOpacity(
+                                                        0.4,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                child: const Center(
+                                                  child: Icon(
+                                                    Icons.apartment,
+                                                    size: 60,
+                                                    color: richBrown,
+                                                  ),
+                                                ),
+                                              ),
                                       ),
                                     ),
                                     Positioned(
@@ -523,13 +695,14 @@ class _NearMeMotelState extends State<NearMeMotel> {
                             const SizedBox(width: 12),
 
                             // Content area
-                            Expanded(
+                            Flexible(
                               flex: 6,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    motel['name'] ?? 'Unknown Motel',
+                                    motel['name']?.toString() ??
+                                        'Unknown Motel',
                                     style: const TextStyle(
                                       color: textDark,
                                       fontSize: 15,
@@ -547,9 +720,9 @@ class _NearMeMotelState extends State<NearMeMotel> {
                                         color: Colors.grey.shade500,
                                       ),
                                       const SizedBox(width: 4),
-                                      Expanded(
+                                      Flexible(
                                         child: Text(
-                                          motel['street_address'] ??
+                                          motel['street_address']?.toString() ??
                                               'Unknown Address',
                                           style: TextStyle(
                                             color: Colors.grey.shade600,
@@ -573,7 +746,8 @@ class _NearMeMotelState extends State<NearMeMotel> {
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
-                                      motel['motel_type'] ?? 'Unknown',
+                                      motel['motel_type']?.toString() ??
+                                          'Unknown',
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 11,
@@ -587,16 +761,11 @@ class _NearMeMotelState extends State<NearMeMotel> {
                             ),
 
                             // Arrow icon aligned safely
-                            Flexible(
-                              flex: 1,
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: Icon(
-                                  Icons.arrow_forward_ios,
-                                  size: 16,
-                                  color: Colors.grey.shade400,
-                                ),
-                              ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                              color: Colors.grey.shade400,
                             ),
                           ],
                         ),

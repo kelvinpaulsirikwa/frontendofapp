@@ -9,32 +9,37 @@ class IconContainer extends StatelessWidget {
   final double borderRadius;
   final Color borderColor;
   final EdgeInsets padding;
-  final VoidCallback? onTap; // 👈 Added onTap
+  final VoidCallback? onTap;
 
   const IconContainer({
     super.key,
     required this.icon,
     this.iconColor = Colors.white,
-    this.iconSize = 24,
-    this.backgroundColor = const Color.fromRGBO(255, 255, 255, 0.15),
-    this.borderRadius = 14,
-    this.borderColor = const Color.fromRGBO(255, 255, 255, 0.2),
-    this.padding = const EdgeInsets.all(12),
-    this.onTap, // 👈 Added parameter
+    this.iconSize = 20, // smaller
+    this.backgroundColor = const Color.fromRGBO(255, 255, 255, 0.12),
+    this.borderRadius = 10, // smaller radius
+    this.borderColor = const Color.fromRGBO(255, 255, 255, 0.18),
+    this.padding = const EdgeInsets.all(8), // smaller padding
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap, // 👈 Detects tap gesture
-      child: Container(
-        padding: padding,
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(borderRadius),
-          border: Border.all(color: borderColor),
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(borderRadius),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(borderRadius),
+            border: Border.all(color: borderColor),
+          ),
+          child: Icon(icon, color: iconColor, size: iconSize),
         ),
-        child: Icon(icon, color: iconColor, size: iconSize),
       ),
     );
   }

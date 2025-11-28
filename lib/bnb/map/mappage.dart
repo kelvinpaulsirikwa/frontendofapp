@@ -27,6 +27,7 @@ class _MapPageState extends State<MapPage> {
   LatLng? currentPosition;
   final Completer<GoogleMapController> _mapcontroller =
       Completer<GoogleMapController>();
+  GoogleMapController? _googleMapController;
   Map<PolylineId, Polyline> polyliness = {};
   BitmapDescriptor? customMarkerIcon;
 
@@ -102,6 +103,10 @@ class _MapPageState extends State<MapPage> {
         );
       }
     });
+
+    if (widget.searchCenter != null) {
+      _animateCameraTo(widget.searchCenter!);
+    }
   }
 
   Future<void> _initializeLocation() async {
@@ -110,11 +115,30 @@ class _MapPageState extends State<MapPage> {
       setState(() {
         currentPosition = LatLng(position.latitude, position.longitude);
       });
+      _animateCameraTo(currentPosition!);
     } else {
       // Use default location if location service fails
       setState(() {
         currentPosition = const LatLng(-6.7783, 39.2058); // Dar es Salaam
       });
+      _animateCameraTo(currentPosition!);
+    }
+  }
+
+  Future<void> _animateCameraTo(LatLng target, {double zoom = 14}) async {
+    try {
+      GoogleMapController? controller = _googleMapController;
+      if (controller == null) {
+        controller = await _mapcontroller.future;
+        _googleMapController = controller;
+      }
+      await controller.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(target: target, zoom: zoom),
+        ),
+      );
+    } catch (e) {
+      print('Error animating camera: $e');
     }
   }
 
@@ -238,8 +262,12 @@ class _MapPageState extends State<MapPage> {
             )
           : GoogleMap(
               mapType: MapType.hybrid,
-              onMapCreated: (GoogleMapController controller) =>
-                  _mapcontroller.complete(controller),
+              onMapCreated: (GoogleMapController controller) {
+                if (!_mapcontroller.isCompleted) {
+                  _mapcontroller.complete(controller);
+                }
+                _googleMapController = controller;
+              },
               initialCameraPosition: CameraPosition(
                 target: currentPosition!,
                 zoom: 14,

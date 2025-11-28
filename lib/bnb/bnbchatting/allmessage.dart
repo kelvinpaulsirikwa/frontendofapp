@@ -80,7 +80,10 @@ class _AllMessageState extends State<AllMessage> {
     });
 
     try {
-      final response = await ChatService.getCustomerChats(_customerId!);
+      final response = await ChatService.getCustomerChats(
+        customerId: _customerId,
+        context: context,
+      );
 
       if (mounted) {
         setState(() {
@@ -179,6 +182,7 @@ class _AllMessageState extends State<AllMessage> {
         bookingId: booking.id,
         motelId: booking.motel.id,
         startedBy: 'customer',
+        context: context,
       );
 
       if (mounted) {
@@ -229,7 +233,10 @@ class _AllMessageState extends State<AllMessage> {
     if (_customerId == null) return;
 
     try {
-      final response = await ChatService.getCustomerChats(_customerId!);
+      final response = await ChatService.getCustomerChats(
+        customerId: _customerId,
+        context: context,
+      );
 
       if (mounted) {
         setState(() {

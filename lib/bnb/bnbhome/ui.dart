@@ -2,6 +2,7 @@ import 'package:bnbfrontendflutter/bnb/bnbhome/favorite.dart';
 import 'package:bnbfrontendflutter/bnb/reusablecomponent/hotelcards.dart';
 import 'package:bnbfrontendflutter/bnb/reusablecomponent/layout.dart';
 import 'package:bnbfrontendflutter/bnb/searching/homesearching.dart';
+import 'package:bnbfrontendflutter/utility/componet.dart';
 import 'package:bnbfrontendflutter/utility/errorcontentretry.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
 import 'package:bnbfrontendflutter/utility/navigateutility.dart';
@@ -18,10 +19,13 @@ class HomeLayout extends StatelessWidget {
   final List<Map<String, dynamic>> accommodationTypes;
   final List<SimpleMotel> featured;
   final List<SimpleMotel> popular;
+  final bool hasMorePages;
+  final bool isLoadingMore;
   final VoidCallback onToggleDropdown;
   final Function(String) onRegionSelected;
   final Function(String) onTypeSelected;
   final VoidCallback onRefresh;
+  final VoidCallback? onLoadMore;
 
   static const String _allRegionsValue = 'All Regions';
   static const String _allTypesValue = 'All Types';
@@ -36,10 +40,13 @@ class HomeLayout extends StatelessWidget {
     required this.accommodationTypes,
     required this.featured,
     required this.popular,
+    this.hasMorePages = false,
+    this.isLoadingMore = false,
     required this.onToggleDropdown,
     required this.onRegionSelected,
     required this.onTypeSelected,
     required this.onRefresh,
+    this.onLoadMore,
   });
 
   @override
@@ -51,55 +58,53 @@ class HomeLayout extends StatelessWidget {
         : selectedRegion;
     return Scaffold(
       backgroundColor: warmSand,
+      extendBodyBehindAppBar: true,
+      appBar: KivuliAppBar(),
       body: Stack(
         children: [
-          SafeArea(
+          NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (scrollInfo.metrics.pixels ==
+                      scrollInfo.metrics.maxScrollExtent &&
+                  hasMorePages &&
+                  !isLoadingMore &&
+                  onLoadMore != null) {
+                onLoadMore!();
+              }
+              return false;
+            },
             child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [deepTerracotta, richBrown],
+              slivers: <Widget>[
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _FixedHeaderDelegate(
+                    child: Container(
+                      width: double.infinity,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [deepTerracotta, richBrown],
+                        ),
                       ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+                      padding: EdgeInsets.only(
+                        top: MediaQuery.of(context).padding.top + 20,
+                        left: 20,
+                        right: 20,
+                      ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // ------------------------
+                          // FAVORITE - TITLE - SEARCH
+                          // ------------------------
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Flexible(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      local.homeWelcomeTitle,
-                                      style: const TextStyle(
-                                        color: softCream,
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: -0.5,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      local.homeWelcomeSubtitle,
-                                      style: const TextStyle(
-                                        color: warmSand,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
                               IconContainer(
                                 icon: Icons.favorite_border,
                                 iconColor: softCream,
+                                backgroundColor: Colors.white24,
+                                iconSize: 22,
                                 onTap: () {
                                   NavigationUtil.pushwithslideTo(
                                     context,
@@ -107,72 +112,36 @@ class HomeLayout extends StatelessWidget {
                                   );
                                 },
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-                          Row(
-                            children: [
+
                               Expanded(
-                                child: GestureDetector(
-                                  onTap: onToggleDropdown,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 14,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      local.homeWelcomeTitle,
+                                      style: const TextStyle(
+                                        color: softCream,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w900,
+                                      ),
                                     ),
-                                    decoration: BoxDecoration(
-                                      color: softCream,
-                                      borderRadius: BorderRadius.circular(12),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.08),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      local.homeWelcomeSubtitle,
+                                      style: const TextStyle(
+                                        color: warmSand,
+                                        fontSize: 14,
+                                      ),
                                     ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.location_on,
-                                              color: deepTerracotta,
-                                              size: 20,
-                                            ),
-                                            const SizedBox(width: 10),
-                                            Text(
-                                              displayRegion,
-                                              style: const TextStyle(
-                                                color: textDark,
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        AnimatedRotation(
-                                          turns: isDropdownOpen ? 0.5 : 0,
-                                          duration: const Duration(
-                                            milliseconds: 200,
-                                          ),
-                                          child: const Icon(
-                                            Icons.keyboard_arrow_down,
-                                            color: textDark,
-                                            size: 22,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(width: 12),
+
                               IconContainer(
                                 icon: Icons.search,
                                 iconColor: softCream,
+                                backgroundColor: Colors.white24,
+                                iconSize: 22,
                                 onTap: () {
                                   NavigationUtil.pushwithslideTo(
                                     context,
@@ -182,14 +151,65 @@ class HomeLayout extends StatelessWidget {
                               ),
                             ],
                           ),
+
+                          const SizedBox(height: 20),
+
+                          // ------------------------
+                          // REGION DROPDOWN
+                          // ------------------------
+                          GestureDetector(
+                            onTap: onToggleDropdown,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: softCream,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.location_on,
+                                        color: deepTerracotta,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Text(
+                                        displayRegion,
+                                        style: const TextStyle(
+                                          color: textDark,
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  AnimatedRotation(
+                                    turns: isDropdownOpen ? 0.5 : 0,
+                                    duration: const Duration(milliseconds: 200),
+                                    child: const Icon(
+                                      Icons.keyboard_arrow_down,
+                                      color: textDark,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ),
                 ),
+
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(15, 24, 20, 16),
+                    padding: const EdgeInsets.fromLTRB(15, 16, 20, 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -269,51 +289,58 @@ class HomeLayout extends StatelessWidget {
                             },
                           ),
                         ),
-                        const SizedBox(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            TextWidgets.iconTextRow(
-                              icon: Icons.location_on,
-                              text: local.homeNearByTitle,
-                            ),
-                            Text(
-                              local.homeViewAll,
-                              style: const TextStyle(
-                                color: deepTerracotta,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
+                        // Only show "Near By" section when "All Types" is selected
+                        if (selectedType == _allTypesValue) ...[
+                          const SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              TextWidgets.iconTextRow(
+                                icon: Icons.location_on,
+                                text: local.homeNearByTitle,
                               ),
-                            ),
-                          ],
-                        ),
+                              Text(
+                                local.homeViewAll,
+                                style: const TextStyle(
+                                  color: deepTerracotta,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ),
                 ),
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 285,
-                    child: featured.isEmpty
-                        ? ErrorContent(
-                            message: local.homeNoDataTitle,
-                            color: richBrown,
-                            onRetry: onRefresh,
-                          )
-                        : ListView.builder(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            scrollDirection: Axis.horizontal,
-                            itemCount: featured.length,
-                            itemBuilder: (context, index) {
-                              final motel = featured[index];
-                              return HotelCards.horizontalHotelCard(
-                                motel: motel,
-                                context: context,
-                              );
-                            },
-                          ),
+                // Only show "Near By" section when "All Types" is selected
+                if (selectedType == _allTypesValue)
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 285,
+                      child: featured.isEmpty
+                          ? ErrorContent(
+                              message: local.homeNoDataTitle,
+                              color: richBrown,
+                              onRetry: onRefresh,
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: featured.length,
+                              itemBuilder: (context, index) {
+                                final motel = featured[index];
+                                return HotelCards.horizontalHotelCard(
+                                  motel: motel,
+                                  context: context,
+                                );
+                              },
+                            ),
+                    ),
                   ),
-                ),
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 28, 20, 16),
@@ -353,12 +380,28 @@ class HomeLayout extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate((context, index) {
-                        final motel = popular[index];
-                        return HotelCards.verticalHotelCard(
-                          motel: motel,
-                          context: context,
-                        );
-                      }, childCount: popular.length),
+                        if (index < popular.length) {
+                          final motel = popular[index];
+                          return HotelCards.verticalHotelCard(
+                            motel: motel,
+                            context: context,
+                          );
+                        }
+
+                        // Loading indicator at the bottom
+                        if (isLoadingMore) {
+                          return const Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: deepTerracotta,
+                              ),
+                            ),
+                          );
+                        }
+
+                        return const SizedBox.shrink();
+                      }, childCount: popular.length + (isLoadingMore ? 1 : 0)),
                     ),
                   ),
               ],
@@ -372,80 +415,118 @@ class HomeLayout extends StatelessWidget {
               ),
             ),
           if (isDropdownOpen)
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 148,
-              left: 20,
-              right: 20,
-              child: Material(
-                color: Colors.transparent,
-                child: Container(
-                  constraints: const BoxConstraints(maxHeight: 350),
-                  decoration: BoxDecoration(
-                    color: softCream,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: richBrown.withOpacity(0.2),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
+            Builder(
+              builder: (context) {
+                // Calculate dropdown width to match button width
+                // Button is now full width (minus horizontal padding)
+                final screenWidth = MediaQuery.of(context).size.width;
+                const horizontalPadding =
+                    20.0; // left and right padding from parent
+                final dropdownWidth = screenWidth - (horizontalPadding * 2);
+
+                return Positioned(
+                  top: MediaQuery.of(context).padding.top + 140,
+                  left: horizontalPadding,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Container(
+                      width: dropdownWidth,
+                      constraints: const BoxConstraints(maxHeight: 350),
+                      decoration: BoxDecoration(
+                        color: softCream,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: richBrown.withOpacity(0.2),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    shrinkWrap: true,
-                    itemCount: regions.length,
-                    itemBuilder: (context, index) {
-                      final isSelected = selectedRegion == regions[index];
-                      return GestureDetector(
-                        onTap: () => onRegionSelected(regions[index]),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? earthGreen.withOpacity(0.15)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                regions[index] == _allRegionsValue
-                                    ? local.homeAllRegions
-                                    : regions[index],
-                                style: TextStyle(
-                                  color: isSelected ? earthGreen : textDark,
-                                  fontSize: 15,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.w500,
-                                ),
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        shrinkWrap: true,
+                        itemCount: regions.length,
+                        itemBuilder: (context, index) {
+                          final isSelected = selectedRegion == regions[index];
+                          return GestureDetector(
+                            onTap: () => onRegionSelected(regions[index]),
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
                               ),
-                              if (isSelected)
-                                const Icon(
-                                  Icons.check_circle,
-                                  color: earthGreen,
-                                  size: 20,
-                                ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? earthGreen.withOpacity(0.15)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    regions[index] == _allRegionsValue
+                                        ? local.homeAllRegions
+                                        : regions[index],
+                                    style: TextStyle(
+                                      color: isSelected ? earthGreen : textDark,
+                                      fontSize: 15,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w600
+                                          : FontWeight.w500,
+                                    ),
+                                  ),
+                                  if (isSelected)
+                                    const Icon(
+                                      Icons.check_circle,
+                                      color: earthGreen,
+                                      size: 20,
+                                    ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
         ],
       ),
     );
+  }
+}
+
+class _FixedHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+
+  _FixedHeaderDelegate({required this.child});
+
+  @override
+  double get minExtent => 200;
+
+  @override
+  double get maxExtent => 200;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return child;
+  }
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
+    return false;
   }
 }

@@ -245,7 +245,7 @@ class _TopSearchMotelState extends State<TopSearchMotel> {
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(12),
                                         child: Showimage.networkImage(
-                                          imageUrl: motel['front_image'],
+                                          imageUrl: motel['front_image']?.toString() ?? '',
                                         ),
                                       ),
                                     ),

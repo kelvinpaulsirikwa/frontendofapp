@@ -1,7 +1,6 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:bnbfrontendflutter/services/api_client.dart';
 import 'package:bnbfrontendflutter/models/bnbroommodel.dart';
-import 'bnbconnection.dart';
+import 'package:flutter/material.dart';
 
 class RoomService {
   static Future<List<Room>> getMotelRooms(
@@ -10,90 +9,57 @@ class RoomService {
     int limit = 10,
     String? status,
     String? roomType,
+    BuildContext? context,
   }) async {
-    try {
-      String url = '$baseUrl/motels/$motelId/rooms?page=$page&limit=$limit';
+    debugPrint('Fetching rooms for motel: $motelId');
 
-      List<String> queryParams = [];
-      if (status != null && status.isNotEmpty && status != 'All') {
-        queryParams.add('status=$status');
-      }
-      if (roomType != null && roomType.isNotEmpty && roomType != 'All') {
-        queryParams.add('room_type=$roomType');
-      }
+    Map<String, String> queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
 
-      if (queryParams.isNotEmpty) {
-        url += '&${queryParams.join('&')}';
-      }
+    if (status != null && status.isNotEmpty && status != 'All') {
+      queryParams['status'] = status;
+    }
+    if (roomType != null && roomType.isNotEmpty && roomType != 'All') {
+      queryParams['room_type'] = roomType;
+    }
 
-      print('Fetching rooms from: $url');
+    final response = await ApiClient.get(
+      '/motels/$motelId/rooms',
+      context: context,
+      queryParams: queryParams,
+    );
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+    debugPrint('Rooms Response: $response');
 
-      print('Rooms API Response Status: ${response.statusCode}');
-      print('Rooms API Response Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-
-        if (data['success'] == true && data['data'] != null) {
-          List<dynamic> roomsJson = data['data'];
-          return roomsJson.map((roomJson) => Room.fromJson(roomJson)).toList();
-        } else {
-          throw Exception('Failed to parse rooms data');
-        }
-      } else {
-        throw Exception('Failed to fetch rooms: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching rooms: $e');
+    if (response['success'] == true && response['data'] != null) {
+      List<dynamic> roomsJson = response['data'];
+      return roomsJson.map((roomJson) => Room.fromJson(roomJson)).toList();
+    } else {
       return [];
     }
   }
 
-  static Future<List<String>> getMotelRoomTypes(int motelId) async {
-    try {
-      String url = '$baseUrl/motels/$motelId/room-types';
+  static Future<List<String>> getMotelRoomTypes(
+    int motelId, {
+    BuildContext? context,
+  }) async {
+    debugPrint('Fetching room types for motel: $motelId');
 
-      print('Fetching motel room types from: $url');
+    final response = await ApiClient.get(
+      '/motels/$motelId/room-types',
+      context: context,
+    );
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+    debugPrint('Room Types Response: $response');
 
-      print('Room Types API Response Status: ${response.statusCode}');
-      print('Room Types API Response Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-
-        if (data['success'] == true && data['data'] != null) {
-          List<dynamic> roomTypesJson = data['data'];
-          return roomTypesJson
-              .map((roomType) => roomType['name'] as String)
-              .toList();
-        } else {
-          throw Exception('Failed to parse room types data');
-        }
-      } else {
-        throw Exception('Failed to fetch room types: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching room types: $e');
+    if (response['success'] == true && response['data'] != null) {
+      List<dynamic> roomTypesJson = response['data'];
+      return roomTypesJson
+          .map((roomType) => roomType['name'] as String)
+          .toList();
+    } else {
       return [];
     }
   }

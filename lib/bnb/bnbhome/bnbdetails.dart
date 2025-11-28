@@ -445,27 +445,70 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
                         text: "Status",
                       ),
                       const SizedBox(height: 16),
-
                       Row(
                         children: [
-                          TextWidgets.iconTextColumn(
-                            icon: Icons.bed, // Total Rooms icon
-                            text: 'Rooms',
-                            number: _motelDetail?.totalRooms ?? 2,
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                              ),
+                              child: GestureDetector(
+                                onTap: () {
+                                  NavigationUtil.pushTo(
+                                    context,
+                                    BnBRooms(motelsDetailsModel: _motelDetail!),
+                                  );
+                                },
+                                child: TextWidgets.iconTextColumn(
+                                  icon: Icons.bed, // Total Rooms icon
+                                  text: 'Rooms',
+                                  number: _motelDetail?.totalRooms ?? 2,
+                                ),
+                              ),
+                            ),
                           ),
-                          const SizedBox(width: 12),
-                          TextWidgets.iconTextColumn(
-                            icon: Icons.meeting_room, // Occupied Rooms icon
-                            text: 'Occupied',
-                            number:
-                                (_motelDetail?.totalRooms ?? 2) -
-                                (_motelDetail?.availableRooms ?? 0),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                              ),
+                              child: GestureDetector(
+                                onTap: () {
+                                  NavigationUtil.pushTo(
+                                    context,
+                                    BnBRooms(motelsDetailsModel: _motelDetail!),
+                                  );
+                                },
+                                child: TextWidgets.iconTextColumn(
+                                  icon:
+                                      Icons.meeting_room, // Occupied Rooms icon
+                                  text: 'Occupied',
+                                  number:
+                                      (_motelDetail?.totalRooms ?? 2) -
+                                      (_motelDetail?.availableRooms ?? 0),
+                                ),
+                              ),
+                            ),
                           ),
-                          const SizedBox(width: 12),
-                          TextWidgets.iconTextColumn(
-                            number: _motelDetail?.availableRooms ?? 2,
-                            icon: Icons.hotel, // Free Rooms icon
-                            text: 'Free',
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                              ),
+                              child: GestureDetector(
+                                onTap: () {
+                                  NavigationUtil.pushTo(
+                                    context,
+                                    BnBRooms(motelsDetailsModel: _motelDetail!),
+                                  );
+                                },
+                                child: TextWidgets.iconTextColumn(
+                                  number: _motelDetail?.availableRooms ?? 2,
+                                  icon: Icons.hotel, // Free Rooms icon
+                                  text: 'Free',
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),

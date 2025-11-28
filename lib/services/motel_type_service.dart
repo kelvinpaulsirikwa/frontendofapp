@@ -1,7 +1,5 @@
-import 'dart:convert';
+import 'package:bnbfrontendflutter/services/api_client.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'bnbconnection.dart';
 
 class MotelType {
   final int id;
@@ -51,59 +49,43 @@ class MotelType {
 class MotelTypeService {
   static Future<List<Map<String, dynamic>>> getAccommodationTypes({
     String? search,
+    BuildContext? context,
   }) async {
-    try {
-      String url = '$baseUrl/motel-types';
+    debugPrint('Fetching motel types');
 
-      if (search != null && search.isNotEmpty) {
-        url += '?search=$search';
-      }
+    Map<String, String>? queryParams;
+    if (search != null && search.isNotEmpty) {
+      queryParams = {'search': search};
+    }
 
-      print('Fetching motel types from: $url');
+    final response = await ApiClient.get(
+      '/motel-types',
+      context: context,
+      queryParams: queryParams,
+    );
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+    debugPrint('Motel Types Response: $response');
 
-      print('Motel Types API Response Status: ${response.statusCode}');
-      print('Motel Types API Response Body: ${response.body}');
+    if (response['success'] == true && response['data'] != null) {
+      List<dynamic> typesJson = response['data'];
+      List<MotelType> types = typesJson
+          .map((typeJson) => MotelType.fromJson(typeJson))
+          .toList();
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
+      // Convert to accommodation type format
+      List<Map<String, dynamic>> accommodationTypes = types
+          .map((type) => type.toAccommodationType())
+          .toList();
 
-        if (data['success'] == true && data['data'] != null) {
-          List<dynamic> typesJson = data['data'];
-          List<MotelType> types = typesJson
-              .map((typeJson) => MotelType.fromJson(typeJson))
-              .toList();
+      // Add "All Types" option at the beginning
+      accommodationTypes.insert(0, {
+        'name': 'All Types',
+        'icon': Icons.home_outlined,
+        'id': 0,
+      });
 
-          // Convert to accommodation type format
-          List<Map<String, dynamic>> accommodationTypes = types
-              .map((type) => type.toAccommodationType())
-              .toList();
-
-          // Add "All Types" option at the beginning
-          accommodationTypes.insert(0, {
-            'name': 'All Types',
-            'icon': Icons.home_outlined,
-            'id': 0,
-          });
-
-          return accommodationTypes;
-        } else {
-          throw Exception('Failed to parse motel types data');
-        }
-      } else {
-        throw Exception('Failed to fetch motel types: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching motel types: $e');
+      return accommodationTypes;
+    } else {
       // Return default accommodation types if API fails
       return [
         {'name': 'All Types', 'icon': Icons.home_outlined, 'id': 0},

@@ -1,4 +1,3 @@
-
 class RoomImageModel {
   final int id;
   final int roomId;

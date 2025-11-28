@@ -3,12 +3,15 @@ import 'package:bnbfrontendflutter/bnb/bnbhome/bnbroomdetails.dart';
 import 'package:bnbfrontendflutter/bnb/bookingpage/booking.dart';
 import 'package:bnbfrontendflutter/bnb/reusablecomponent/buttons.dart';
 import 'package:bnbfrontendflutter/services/favorites_service.dart';
+import 'package:bnbfrontendflutter/services/location_service.dart';
 import 'package:bnbfrontendflutter/models/bnb_motels_details_model.dart';
 import 'package:bnbfrontendflutter/models/bnbmodel.dart';
 import 'package:bnbfrontendflutter/models/bnbroommodel.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
 import 'package:bnbfrontendflutter/utility/images.dart';
 import 'package:bnbfrontendflutter/utility/navigateutility.dart';
+import 'package:bnbfrontendflutter/utility/distance_calculator.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 
 class HotelCards {
@@ -64,7 +67,7 @@ class HotelCards {
                         borderRadius: BorderRadius.circular(30),
                       ),
                       child: Showimage.networkImage(
-                        imageUrl: motel.frontImage.toString(),
+                        imageUrl: motel.frontImage?.toString() ?? '',
                       ),
                     ),
                   ),
@@ -99,66 +102,120 @@ class HotelCards {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    motel.name,
-                    style: const TextStyle(
-                      color: textDark,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
-                        Icons.location_on_outlined,
-                        size: 14,
-                        color: textLight,
-                      ),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          '${motel.streetAddress}, ${motel.district}',
-                          style: const TextStyle(
-                            color: textLight,
-                            fontSize: 12,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
+                      Text(
+                        motel.name,
+                        style: const TextStyle(
+                          color: textDark,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.location_on_outlined,
+                            size: 15,
+                            color: textLight,
+                          ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              '${motel.streetAddress}, ${motel.district}',
+                              style: const TextStyle(
+                                color: textLight,
+                                fontSize: 16,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.directions_sharp,
+                            size: 14,
+                            color: textLight,
+                          ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: FutureBuilder<Position?>(
+                              future: LocationService.getCurrentLocation(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Text(
+                                    'Calculating...',
+                                    style: TextStyle(
+                                      color: textLight,
+                                      fontSize: 12,
+                                    ),
+                                  );
+                                }
+
+                                if (snapshot.hasError ||
+                                    !snapshot.hasData ||
+                                    snapshot.data == null) {
+                                  return const Text(
+                                    'Distance unavailable',
+                                    style: TextStyle(
+                                      color: textLight,
+                                      fontSize: 12,
+                                    ),
+                                  );
+                                }
+
+                                if (motel.latitude == null ||
+                                    motel.longitude == null) {
+                                  return const Text(
+                                    'Location unavailable',
+                                    style: TextStyle(
+                                      color: textLight,
+                                      fontSize: 12,
+                                    ),
+                                  );
+                                }
+
+                                final currentPosition = snapshot.data!;
+                                final distance =
+                                    DistanceCalculator.calculateDistance(
+                                      currentPosition.latitude,
+                                      currentPosition.longitude,
+                                      motel.latitude!,
+                                      motel.longitude!,
+                                    );
+                                final formattedDistance =
+                                    DistanceCalculator.formatDistance(distance);
+
+                                return Text(
+                                  '$formattedDistance away',
+                                  style: const TextStyle(
+                                    color: textLight,
+                                    fontSize: 12,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.home_outlined,
-                        size: 14,
-                        color: textLight,
-                      ),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          motel.motelType,
-                          style: const TextStyle(
-                            color: textLight,
-                            fontSize: 12,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
           ],

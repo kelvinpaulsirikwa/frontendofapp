@@ -1,7 +1,5 @@
-import 'dart:convert';
-import 'package:bnbfrontendflutter/services/bnbconnection.dart';
+import 'package:bnbfrontendflutter/services/api_client.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class AmenitiesAllImages {
   final String filepath;
@@ -51,40 +49,22 @@ class AmenitiesImagesService {
     int bnbamenitiesid, {
     int page = 1,
     int limit = 10,
+    BuildContext? context,
   }) async {
-    try {
-      String url =
-          '$baseUrl/amenities/$bnbamenitiesid/amenitiesimage?page=$page&limit=$limit';
+    debugPrint('Fetching amenities images for: $bnbamenitiesid');
 
-      debugPrint('Fetching motel images: $url');
+    final queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
 
-      // Get the authentication token
+    final response = await ApiClient.get(
+      '/amenities/$bnbamenitiesid/amenitiesimage',
+      context: context,
+      queryParams: queryParams,
+    );
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(const Duration(seconds: 30));
-
-      debugPrint('Motel Images API Response Status: ${response.statusCode}');
-      debugPrint('Motel Images API Response Body: ${response.body}');
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        return data;
-      } else {
-        final Map<String, dynamic> errorData = json.decode(response.body);
-        return {
-          'success': false,
-          'message': errorData['message'] ?? 'Failed to fetch images',
-        };
-      }
-    } catch (e) {
-      debugPrint('Error fetching motel images: $e');
-      return {'success': false, 'message': 'Network error: $e'};
-    }
+    debugPrint('Amenities Images Response: $response');
+    return response;
   }
 }

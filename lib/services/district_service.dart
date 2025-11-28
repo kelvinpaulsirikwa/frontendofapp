@@ -1,6 +1,5 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'bnbconnection.dart';
+import 'package:bnbfrontendflutter/services/api_client.dart';
+import 'package:flutter/material.dart';
 
 class District {
   final int id;
@@ -32,55 +31,35 @@ class DistrictService {
   static Future<List<District>> getDistricts({
     String? search,
     int? regionId,
+    BuildContext? context,
   }) async {
-    try {
-      String url = '$baseUrl/districts';
-      List<String> queryParams = [];
+    debugPrint('Fetching districts');
 
-      if (search != null && search.isNotEmpty) {
-        queryParams.add('search=$search');
-      }
-      if (regionId != null) {
-        queryParams.add('region_id=$regionId');
-      }
+    Map<String, String> queryParams = {};
 
-      if (queryParams.isNotEmpty) {
-        url += '?${queryParams.join('&')}';
-      }
+    if (search != null && search.isNotEmpty) {
+      queryParams['search'] = search;
+    }
+    if (regionId != null) {
+      queryParams['region_id'] = regionId.toString();
+    }
 
-      print('Fetching districts from: $url');
+    final response = await ApiClient.get(
+      '/districts',
+      context: context,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
+    );
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+    debugPrint('Districts Response: $response');
 
-      print('Districts API Response Status: ${response.statusCode}');
-      print('Districts API Response Body: ${response.body}');
+    if (response['success'] == true && response['data'] != null) {
+      List<dynamic> districtsJson = response['data'];
+      List<District> districts = districtsJson
+          .map((districtJson) => District.fromJson(districtJson))
+          .toList();
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-
-        if (data['success'] == true && data['data'] != null) {
-          List<dynamic> districtsJson = data['data'];
-          List<District> districts = districtsJson
-              .map((districtJson) => District.fromJson(districtJson))
-              .toList();
-
-          return districts;
-        } else {
-          throw Exception('Failed to parse districts data');
-        }
-      } else {
-        throw Exception('Failed to fetch districts: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching districts: $e');
+      return districts;
+    } else {
       // Return empty list if API fails
       return [];
     }

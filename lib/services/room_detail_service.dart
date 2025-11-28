@@ -1,55 +1,42 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:bnbfrontendflutter/services/api_client.dart';
+import 'package:bnbfrontendflutter/services/bnbconnection.dart';
 import 'package:bnbfrontendflutter/models/room_detail_model.dart';
-import 'bnbconnection.dart';
+import 'package:flutter/material.dart';
 
 class RoomDetailService {
-
   static Future<List<RoomImageModel>> getRoomImages(
     int roomId, {
     int page = 1,
     int limit = 5,
+    BuildContext? context,
   }) async {
-    try {
-      String url = '$baseUrl/rooms/$roomId/images?page=$page&limit=$limit';
+    debugPrint('Fetching room images for: $roomId');
 
-      print('Fetching room images from: $url');
+    final queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+    final response = await ApiClient.get(
+      '/rooms/$roomId/images',
+      context: context,
+      queryParams: queryParams,
+    );
 
-      print('Room Images API Response Status: ${response.statusCode}');
-      print('Room Images API Response Body: ${response.body}');
+    debugPrint('Room Images Response: $response');
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-
-        if (data['success'] == true && data['data'] != null) {
-          List<dynamic> imagesJson = data['data'];
-          return imagesJson.map((imageJson) {
-            // Construct full image URL
-            if (imageJson['imagepath'] != null &&
-                imageJson['imagepath'].isNotEmpty) {
-              imageJson['imagepath'] =
-                  '$baseUrl/storage/${imageJson['imagepath']}';
-            }
-            return RoomImageModel.fromJson(imageJson);
-          }).toList();
-        } else {
-          throw Exception('Failed to parse room images data');
+    if (response['success'] == true && response['data'] != null) {
+      List<dynamic> imagesJson = response['data'];
+      return imagesJson.map((imageJson) {
+        // Construct full image URL
+        if (imageJson['imagepath'] != null &&
+            imageJson['imagepath'].isNotEmpty) {
+          imageJson['imagepath'] =
+              '$baseUrl/storage/${imageJson['imagepath']}';
         }
-      } else {
-        throw Exception('Failed to fetch room images: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching room images: $e');
+        return RoomImageModel.fromJson(imageJson);
+      }).toList();
+    } else {
       return [];
     }
   }
@@ -58,41 +45,29 @@ class RoomDetailService {
     int roomId, {
     int page = 1,
     int limit = 10,
+    BuildContext? context,
   }) async {
-    try {
-      String url = '$baseUrl/rooms/$roomId/items?page=$page&limit=$limit';
+    debugPrint('Fetching room items for: $roomId');
 
-      print('Fetching room items from: $url');
+    final queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+    final response = await ApiClient.get(
+      '/rooms/$roomId/items',
+      context: context,
+      queryParams: queryParams,
+    );
 
-      print('Room Items API Response Status: ${response.statusCode}');
-      print('Room Items API Response Body: ${response.body}');
+    debugPrint('Room Items Response: $response');
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-
-        if (data['success'] == true && data['data'] != null) {
-          List<dynamic> itemsJson = data['data'];
-          return itemsJson
-              .map((itemJson) => RoomItemModel.fromJson(itemJson))
-              .toList();
-        } else {
-          throw Exception('Failed to parse room items data');
-        }
-      } else {
-        throw Exception('Failed to fetch room items: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching room items: $e');
+    if (response['success'] == true && response['data'] != null) {
+      List<dynamic> itemsJson = response['data'];
+      return itemsJson
+          .map((itemJson) => RoomItemModel.fromJson(itemJson))
+          .toList();
+    } else {
       return [];
     }
   }

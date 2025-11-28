@@ -1,6 +1,5 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'bnbconnection.dart';
+import 'package:bnbfrontendflutter/services/api_client.dart';
+import 'package:flutter/material.dart';
 
 class Region {
   final int id;
@@ -32,58 +31,38 @@ class RegionService {
   static Future<List<Region>> getRegions({
     String? search,
     int? countryId,
+    BuildContext? context,
   }) async {
-    try {
-      String url = '$baseUrl/regions';
-      List<String> queryParams = [];
+    debugPrint('Fetching regions');
 
-      if (search != null && search.isNotEmpty) {
-        queryParams.add('search=$search');
-      }
-      if (countryId != null) {
-        queryParams.add('country_id=$countryId');
-      }
+    Map<String, String> queryParams = {};
 
-      if (queryParams.isNotEmpty) {
-        url += '?${queryParams.join('&')}';
-      }
+    if (search != null && search.isNotEmpty) {
+      queryParams['search'] = search;
+    }
+    if (countryId != null) {
+      queryParams['country_id'] = countryId.toString();
+    }
 
-      print('Fetching regions from: $url');
+    final response = await ApiClient.get(
+      '/regions',
+      context: context,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
+    );
 
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(Duration(seconds: 30));
+    debugPrint('Regions Response: $response');
 
-      print('Regions API Response Status: ${response.statusCode}');
-      print('Regions API Response Body: ${response.body}');
+    if (response['success'] == true && response['data'] != null) {
+      List<dynamic> regionsJson = response['data'];
+      List<Region> regions = regionsJson
+          .map((regionJson) => Region.fromJson(regionJson))
+          .toList();
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
+      // Add "All Regions" option at the beginning
+      regions.insert(0, Region(id: 0, name: 'All Regions', countryId: 0));
 
-        if (data['success'] == true && data['data'] != null) {
-          List<dynamic> regionsJson = data['data'];
-          List<Region> regions = regionsJson
-              .map((regionJson) => Region.fromJson(regionJson))
-              .toList();
-
-          // Add "All Regions" option at the beginning
-          regions.insert(0, Region(id: 0, name: 'All Regions', countryId: 0));
-
-          return regions;
-        } else {
-          throw Exception('Failed to parse regions data');
-        }
-      } else {
-        throw Exception('Failed to fetch regions: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching regions: $e');
+      return regions;
+    } else {
       // Return default regions if API fails
       return [
         Region(id: 0, name: 'All Regions', countryId: 0),
