@@ -2,7 +2,7 @@ name: bnbfrontendflutter
 description: "A new Flutter project."
 publish_to: 'none' # Prevent publishing to pub.dev
 
-version: 1.0.0+1
+version: 2.0.0+2
 
 environment:
   sdk: ">=3.8.1 <4.0.0"

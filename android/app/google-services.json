@@ -12,7 +12,44 @@
           "package_name": "tz.co.bnb"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "530279015145-4g9gp0no09nd9v3atki99ir351ig6vn4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "tz.co.bnb",
+            "certificate_hash": "3be395d8df9d92ac0ee1ec225dbe57b7ece80c95"
+          }
+        },
+        {
+          "client_id": "530279015145-83b753cuaf4bu1h8d3obleqanllh9ud9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "tz.co.bnb",
+            "certificate_hash": "199a8552e20cfaf54992695a9843e285ed8ae6c1"
+          }
+        },
+        {
+          "client_id": "530279015145-bntdcfe52ssdhk3gl8c0itfmccestpnb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "tz.co.bnb",
+            "certificate_hash": "55d955b3aacc085efcf6ac1f0a4eb2832b4d9cb7"
+          }
+        },
+        {
+          "client_id": "530279015145-p3pkcqa97saem08sil26ilonc1lmm177.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "tz.co.bnb",
+            "certificate_hash": "7a4e329ec6603c750a933ea86790b53ff8fdae47"
+          }
+        },
+        {
+          "client_id": "530279015145-c8lhbs7jp5i7g6d9afvfuh5m2tba9218.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB5Hhug2sg4YPHxYZKeC_mf59iSrOkkBbc"
@@ -20,7 +57,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "530279015145-c8lhbs7jp5i7g6d9afvfuh5m2tba9218.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
