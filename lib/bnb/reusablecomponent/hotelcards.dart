@@ -354,20 +354,30 @@ class HotelCards {
     required Room room,
     required BuildContext context,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: softCream,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: richBrown.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    return GestureDetector(
+      onTap: () {
+        NavigationUtil.pushTo(
+          context,
+          BnBRoomDetails(
+            room: room,
+            motelsDetailsModel: motelsDetailsModel,
           ),
-        ],
-      ),
-      child: Column(
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: softCream,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: richBrown.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Room image
@@ -520,6 +530,7 @@ class HotelCards {
             ),
           ),
         ],
+      ),
       ),
     );
   }

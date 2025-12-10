@@ -3,6 +3,7 @@ import 'package:bnbfrontendflutter/models/bnb_motels_details_model.dart';
 import 'package:bnbfrontendflutter/models/bnbroommodel.dart';
 import 'package:bnbfrontendflutter/models/room_detail_model.dart';
 import 'package:bnbfrontendflutter/services/room_detail_service.dart';
+import 'package:bnbfrontendflutter/services/share_service.dart';
 import 'package:bnbfrontendflutter/utility/navigateutility.dart';
 import 'package:bnbfrontendflutter/bnb/bookingpage/booking.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
@@ -273,7 +274,23 @@ class _BnBRoomDetailsState extends State<BnBRoomDetails>
                   icon: Icons.share,
                   backgroundColor: softCream,
                   iconColor: richBrown,
-                  onTap: () {},
+                  onTap: () async {
+                    try {
+                      await ShareService.shareRoom(
+                        room: widget.room,
+                        property: widget.motelsDetailsModel,
+                      );
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to share: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  },
                 ),
               ),
             ],

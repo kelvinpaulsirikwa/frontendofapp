@@ -64,12 +64,7 @@ class Showimage {
             imagecontent,
             context: context,
             actions: [
-              IconContainer(
-                icon: Icons.share,
-                backgroundColor: softCream,
-                iconColor: textDark,
-                onTap: () {},
-              ),
+              
             ],
           ),
           body: Center(

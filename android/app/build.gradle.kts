@@ -9,11 +9,11 @@ plugins {
 }
 
 
-val keystoreProperties = Properties()
-val keystorePropertiesFile = rootProject.file("key.properties")
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-}
+// val keystoreProperties = Properties()
+// val keystorePropertiesFile = rootProject.file("key.properties")
+// if (keystorePropertiesFile.exists()) {
+//     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+// }
 
 
 
@@ -40,25 +40,25 @@ android {
         versionName = flutter.versionName
     }
 
-    signingConfigs {
-        create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as String
-            keyPassword = keystoreProperties["keyPassword"] as String
-            storeFile = keystoreProperties["storeFile"]?.let { file(it as String) }
-            storePassword = keystoreProperties["storePassword"] as String
-        }
-    }
+    // signingConfigs {
+    //     create("release") {
+    //        keyAlias = keystoreProperties["keyAlias"] as? String ?: ""
+    //     keyPassword = keystoreProperties["keyPassword"] as? String ?: ""
+    //     storeFile = keystoreProperties["storeFile"]?.let { file(it as String) }
+    //     storePassword = keystoreProperties["storePassword"] as? String ?: ""
+    // }
+    // }
 
-    buildTypes {
-        getByName("release") {
-            isMinifyEnabled = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            signingConfig = signingConfigs.getByName("release")
-        }
-    }
+    // buildTypes {
+    //     getByName("release") {
+    //         isMinifyEnabled = true
+    //         proguardFiles(
+    //             getDefaultProguardFile("proguard-android-optimize.txt"),
+    //             "proguard-rules.pro"
+    //         )
+    //         signingConfig = signingConfigs.getByName("release")
+    //     }
+    // }
 
 }
 

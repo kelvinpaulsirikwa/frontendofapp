@@ -30,6 +30,10 @@ dependencies:
   geolocator: ^10.1.0
   geocoding: ^2.1.1 
 
+  # Sharing and Deep Linking
+  share_plus: ^7.2.1
+  app_links: ^6.3.3
+
   # Hive dependencies
   hive: ^2.2.3
   hive_flutter: ^1.1.0

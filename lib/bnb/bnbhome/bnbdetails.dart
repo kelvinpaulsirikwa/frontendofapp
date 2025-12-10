@@ -9,6 +9,7 @@ import 'package:bnbfrontendflutter/models/bnbmodel.dart';
 import 'package:bnbfrontendflutter/models/bnb_motels_details_model.dart';
 import 'package:bnbfrontendflutter/services/favorites_service.dart';
 import 'package:bnbfrontendflutter/services/motel_detail_service.dart';
+import 'package:bnbfrontendflutter/services/share_service.dart';
 import 'package:bnbfrontendflutter/utility/amenities.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
 import 'package:bnbfrontendflutter/utility/errorcontentretry.dart';
@@ -396,45 +397,60 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
                                     icon: Icons.photo_library,
                                     text: 'Photos',
                                   ),
-                                  SmallContainer(
-                                    whatToShow: 'View All',
-                                    showArrow: true,
-                                    onTap: () {
-                                      NavigationUtil.pushwithslideTo(
-                                        context,
-                                        BnBHotelImages(
-                                          motelid: widget.motel.id,
-                                        ),
-                                      );
-                                    },
-                                  ),
+                                  if (_images.isNotEmpty)
+                                    SmallContainer(
+                                      whatToShow: 'View All',
+                                      showArrow: true,
+                                      onTap: () {
+                                        NavigationUtil.pushwithslideTo(
+                                          context,
+                                          BnBHotelImages(
+                                            motelid: widget.motel.id,
+                                          ),
+                                        );
+                                      },
+                                    ),
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              SizedBox(
-                                height: 80,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: _images.length > 5
-                                      ? 5
-                                      : _images.length,
-                                  itemBuilder: (context, index) {
-                                    if (index == 4 && _images.length > 5) {
-                                      // Last item shows "+X more"
-                                      return Showimage.showSmallImage(
-                                        _images[index].imageUrl,
-                                        context,
-                                        widget.motel.name,
-                                      );
-                                    }
-                                    return Showimage.showSmallImage(
-                                      _images[index].imageUrl,
-                                      context,
-                                      widget.motel.name.toString(),
-                                    );
-                                  },
-                                ),
-                              ),
+                              _images.isEmpty
+                                  ? Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 20),
+                                        child: Text(
+                                          'No photos available',
+                                          style: TextStyle(
+                                            color: textLight.withOpacity(0.6),
+                                            fontSize: 14,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : SizedBox(
+                                      height: 80,
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: _images.length > 5
+                                            ? 5
+                                            : _images.length,
+                                        itemBuilder: (context, index) {
+                                          if (index == 4 && _images.length > 5) {
+                                            // Last item shows "+X more"
+                                            return Showimage.showSmallImage(
+                                              _images[index].imageUrl,
+                                              context,
+                                              widget.motel.name,
+                                            );
+                                          }
+                                          return Showimage.showSmallImage(
+                                            _images[index].imageUrl,
+                                            context,
+                                            widget.motel.name.toString(),
+                                          );
+                                        },
+                                      ),
+                                    ),
                             ],
                           ),
                         ),
@@ -574,23 +590,37 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      SizedBox(
-                        height: 120,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: _amenities.length > 8
-                              ? 8
-                              : _amenities.length,
-                          itemBuilder: (context, index) {
-                            final amenity = _amenities[index];
-                            return AmenityCard(
-                              amenity: amenity,
-                              onTap: () =>
-                                  _showAmenityDetails(context, amenity),
-                            );
-                          },
-                        ),
-                      ),
+                      _amenities.isEmpty
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 20),
+                                child: Text(
+                                  'No amenities available',
+                                  style: TextStyle(
+                                    color: textLight.withOpacity(0.6),
+                                    fontSize: 14,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : SizedBox(
+                              height: 120,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: _amenities.length > 8
+                                    ? 8
+                                    : _amenities.length,
+                                itemBuilder: (context, index) {
+                                  final amenity = _amenities[index];
+                                  return AmenityCard(
+                                    amenity: amenity,
+                                    onTap: () =>
+                                        _showAmenityDetails(context, amenity),
+                                  );
+                                },
+                              ),
+                            ),
                     ],
                   ),
                 ),
@@ -682,6 +712,7 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
                                 DirectMe(
                                   latitude: widget.motel.latitude.toString(),
                                   longtude: widget.motel.longitude.toString(),
+                                  name: widget.motel.name,
                                 ),
                               );
                             },
@@ -698,7 +729,7 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
                             12,
                           ), // Optional: rounded corners
                           child: GoogleMap(
-                            mapType: MapType.hybrid,
+                            mapType: MapType.normal,
                             onMapCreated: (GoogleMapController controller) {},
                             initialCameraPosition: CameraPosition(
                               target: LatLng(
@@ -734,7 +765,23 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
                   child: Column(
                     children: [
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () async {
+                          try {
+                            await ShareService.shareProperty(
+                              motel: widget.motel,
+                              description: _motelDetail?.description,
+                            );
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Failed to share: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        },
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
@@ -800,10 +847,17 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${_motelDetail?.availableRooms ?? 0} Available',
+                      '${_motelDetail?.availableRooms ?? 0} ',
                       style: const TextStyle(
                         color: deepTerracotta,
-                        fontSize: 24,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ), const Text(
+                      'Available',
+                      style: TextStyle(
+                        color: deepTerracotta,
+                      fontSize: 20,
                         fontWeight: FontWeight.w800,
                       ),
                     ),

@@ -4,6 +4,7 @@ import 'package:bnbfrontendflutter/l10n/app_localizations.dart';
 import 'package:bnbfrontendflutter/l10n/languagemanagemen.dart';
 import 'package:bnbfrontendflutter/loading.dart';
 import 'package:bnbfrontendflutter/services/api_client.dart';
+import 'package:bnbfrontendflutter/services/deep_link_service.dart';
 import 'package:bnbfrontendflutter/services/favorites_service.dart';
 import 'package:bnbfrontendflutter/utility/sharedpreferences.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +50,12 @@ class _MyAppState extends State<MyApp> {
     _locale = const Locale('en');
   }
 
+  @override
+  void dispose() {
+    DeepLinkService.dispose();
+    super.dispose();
+  }
+
   void changeLocale(Locale newLocale) {
     setState(() {
       _locale = newLocale;
@@ -79,6 +86,13 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize deep link handling after first build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        DeepLinkService.init(context);
+      }
+    });
+
     return MaterialApp(
       navigatorKey: navigatorKey,
       title: 'Tanzania BnB',

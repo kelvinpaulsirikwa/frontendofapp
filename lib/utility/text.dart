@@ -49,30 +49,28 @@ class TextWidgets {
     required String text,
     required int number,
   }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: warmSand,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: deepTerracotta, size: 24),
-            const SizedBox(height: 4),
-            Text(number.toString()),
-            const SizedBox(height: 4),
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: warmSand,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: deepTerracotta, size: 24),
+          const SizedBox(height: 4),
+          Text(number.toString()),
+          const SizedBox(height: 4),
 
-            Text(
-              text,
-              style: const TextStyle(
-                color: textDark,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
+          Text(
+            text,
+            style: const TextStyle(
+              color: textDark,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
