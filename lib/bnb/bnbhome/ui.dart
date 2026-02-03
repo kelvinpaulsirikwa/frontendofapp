@@ -62,8 +62,14 @@ class HomeLayout extends StatelessWidget {
       appBar: KivuliAppBar(),
       floatingActionButton: _RegionFab(
         displayRegion: displayRegion,
-        isDropdownOpen: isDropdownOpen,
-        onToggleDropdown: onToggleDropdown,
+        onTap: () => _showRegionBottomSheet(
+          context,
+          regions: regions,
+          selectedRegion: selectedRegion,
+          allRegionsValue: _allRegionsValue,
+          onRegionSelected: onRegionSelected,
+          local: local,
+        ),
       ),
       body: Stack(
         children: [
@@ -188,9 +194,10 @@ class HomeLayout extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         SizedBox(
-                          height: 55, // 👈 smaller and elegant
+                          height: 32,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
                             itemCount: accommodationTypes.length,
                             itemBuilder: (context, index) {
                               final type = accommodationTypes[index];
@@ -199,53 +206,50 @@ class HomeLayout extends StatelessWidget {
                               final displayName = name == _unknownValue
                                   ? local.homeUnknownType
                                   : name == _allTypesValue
-                                  ? local.homeAllTypes
-                                  : name;
+                                      ? local.homeAllTypes
+                                      : name;
                               final isSelected = selectedType == name;
 
-                              return GestureDetector(
-                                onTap: () =>
-                                    onTypeSelected(type['name'] as String),
-                                child: Container(
-                                  margin: const EdgeInsets.only(right: 8),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? earthGreen
-                                        : Colors.white,
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 6),
+                                child: GestureDetector(
+                                  onTap: () =>
+                                      onTypeSelected(type['name'] as String),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
                                       color: isSelected
                                           ? earthGreen
-                                          : Colors.grey.shade300,
-                                      width: 1.2,
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? earthGreen
+                                            : const Color(0xFFE5E7EB),
+                                        width: isSelected ? 1.5 : 1,
+                                      ),
                                     ),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    displayName,
-                                    style: TextStyle(
-                                      color: isSelected
-                                          ? Colors.white
-                                          : Colors.grey.shade800,
-                                      fontSize: 12,
-                                      fontWeight: isSelected
-                                          ? FontWeight.w600
-                                          : FontWeight.w500,
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      displayName,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.grey.shade800,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    textAlign: TextAlign.center,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               );
                             },
                           ),
                         ),
-                        // Only show "Near By" section when "All Types" is selected
-                        if (selectedType == _allTypesValue) ...[
+  if (selectedType == _allTypesValue) ...[
                           const SizedBox(height: 24),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -362,95 +366,146 @@ class HomeLayout extends StatelessWidget {
               ],
             ),
           ),
-          if (isDropdownOpen)
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: onToggleDropdown,
-                child: Container(color: Colors.black.withOpacity(0.3)),
-              ),
-            ),
-          if (isDropdownOpen)
-            Builder(
-              builder: (context) {
-                final screenWidth = MediaQuery.of(context).size.width;
-                final dropdownWidth = (screenWidth - 32).clamp(0.0, 320.0);
+        ],
+      ),
+    );
+  }
+}
 
-                return Positioned(
-                  right: 16,
-                  bottom: 88,
-                  width: dropdownWidth,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Container(
-                      width: dropdownWidth,
-                      constraints: const BoxConstraints(maxHeight: 350),
-                      decoration: BoxDecoration(
-                        color: softCream,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: richBrown.withOpacity(0.2),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
+void _showRegionBottomSheet(
+  BuildContext context, {
+  required List<String> regions,
+  required String selectedRegion,
+  required String allRegionsValue,
+  required Function(String) onRegionSelected,
+  required AppLocalizations local,
+}) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    builder: (ctx) => _RegionBottomSheetContent(
+      regions: regions,
+      selectedRegion: selectedRegion,
+      allRegionsValue: allRegionsValue,
+      onRegionSelected: (region) {
+        onRegionSelected(region);
+        Navigator.pop(ctx);
+      },
+      local: local,
+    ),
+  );
+}
+
+class _RegionBottomSheetContent extends StatelessWidget {
+  final List<String> regions;
+  final String selectedRegion;
+  final String allRegionsValue;
+  final Function(String) onRegionSelected;
+  final AppLocalizations local;
+
+  const _RegionBottomSheetContent({
+    required this.regions,
+    required this.selectedRegion,
+    required this.allRegionsValue,
+    required this.onRegionSelected,
+    required this.local,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.6,
+      ),
+      decoration: BoxDecoration(
+        color: softCream,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: richBrown.withOpacity(0.25),
+            blurRadius: 24,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: richBrown.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+            child: Row(
+              children: [
+                Icon(Icons.location_on_rounded, color: deepTerracotta, size: 24),
+                const SizedBox(width: 10),
+                Text(
+                  local.homeAllRegions,
+                  style: const TextStyle(
+                    color: textDark,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Flexible(
+            child: ListView.builder(
+              shrinkWrap: true,
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+              itemCount: regions.length,
+              itemBuilder: (context, index) {
+                final isSelected = selectedRegion == regions[index];
+                return GestureDetector(
+                  onTap: () => onRegionSelected(regions[index]),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? earthGreen.withOpacity(0.15)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          regions[index] == allRegionsValue
+                              ? local.homeAllRegions
+                              : regions[index],
+                          style: TextStyle(
+                            color: isSelected ? earthGreen : textDark,
+                            fontSize: 15,
+                            fontWeight:
+                                isSelected ? FontWeight.w600 : FontWeight.w500,
                           ),
-                        ],
-                      ),
-                      child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        shrinkWrap: true,
-                        itemCount: regions.length,
-                        itemBuilder: (context, index) {
-                          final isSelected = selectedRegion == regions[index];
-                          return GestureDetector(
-                            onTap: () => onRegionSelected(regions[index]),
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? earthGreen.withOpacity(0.15)
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    regions[index] == _allRegionsValue
-                                        ? local.homeAllRegions
-                                        : regions[index],
-                                    style: TextStyle(
-                                      color: isSelected ? earthGreen : textDark,
-                                      fontSize: 15,
-                                      fontWeight: isSelected
-                                          ? FontWeight.w600
-                                          : FontWeight.w500,
-                                    ),
-                                  ),
-                                  if (isSelected)
-                                    const Icon(
-                                      Icons.check_circle,
-                                      color: earthGreen,
-                                      size: 20,
-                                    ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                        ),
+                        if (isSelected)
+                          const Icon(
+                            Icons.check_circle,
+                            color: earthGreen,
+                            size: 22,
+                          ),
+                      ],
                     ),
                   ),
                 );
               },
             ),
+          ),
         ],
       ),
     );
@@ -459,13 +514,11 @@ class HomeLayout extends StatelessWidget {
 
 class _RegionFab extends StatelessWidget {
   final String displayRegion;
-  final bool isDropdownOpen;
-  final VoidCallback onToggleDropdown;
+  final VoidCallback onTap;
 
   const _RegionFab({
     required this.displayRegion,
-    required this.isDropdownOpen,
-    required this.onToggleDropdown,
+    required this.onTap,
   });
 
   @override
@@ -490,7 +543,7 @@ class _RegionFab extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onToggleDropdown,
+          onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -523,14 +576,10 @@ class _RegionFab extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 6),
-                AnimatedRotation(
-                  turns: isDropdownOpen ? 0.5 : 0,
-                  duration: const Duration(milliseconds: 200),
-                  child: const Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    color: softCream,
-                    size: 24,
-                  ),
+                const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: softCream,
+                  size: 24,
                 ),
               ],
             ),
