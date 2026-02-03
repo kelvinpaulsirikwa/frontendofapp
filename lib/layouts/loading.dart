@@ -1,9 +1,111 @@
+import 'package:bnbfrontendflutter/utility/colors.dart';
+import 'package:bnbfrontendflutter/utility/componet.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+
+class Loading {
+  const Loading._(); // prevents instantiation
+   static void showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent closing by tapping outside
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Align(
+            alignment: Alignment.bottomCenter, // Align to the bottom
+            child: Container(
+              margin: const EdgeInsets.all(
+                20,
+              ), // Optional: Add margin if needed
+              padding: const EdgeInsets.symmetric(
+                vertical: 20,
+                horizontal: 30,
+              ), // Optional: Add padding if needed
+             
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LoadingAnimationWidget(size: 80),
+                  SizedBox(height: 15),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+ 
+
+  static Widget splashLoading({
+    required Future<void> Function() onInit,
+    required Widget Function(bool isLoggedIn) onComplete,
+  }) {
+    return SplashLoadingPage(
+      onInit: onInit,
+      onComplete: onComplete,
+    );
+  }
+}
+
+/// Reusable animated loading spinner used in dialogs and splash.
+class LoadingAnimationWidget extends StatefulWidget {
+  final double size;
+
+  const LoadingAnimationWidget({super.key, this.size = 80});
+
+  @override
+  State<LoadingAnimationWidget> createState() => _LoadingAnimationWidgetState();
+}
+
+class _LoadingAnimationWidgetState extends State<LoadingAnimationWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return SizedBox(
+          width: widget.size,
+          height: widget.size,
+          child: CustomPaint(
+            painter: LoadingDots(
+              progress: _controller.value,
+              terracotta: deepTerracotta,
+              green: earthGreen,
+              orange: sunsetOrange,
+              gold: accentGold,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
 
 class SplashLoadingPage extends StatefulWidget {
   final Future<void> Function() onInit;
   final Widget Function(bool isLoggedIn) onComplete;
+  /// When true, never navigates away - useful for development
 
   const SplashLoadingPage({
     super.key,
@@ -27,15 +129,6 @@ class _SplashLoadingPageState extends State<SplashLoadingPage>
   bool _isLoggedIn = false;
 
   // Tanzania BnB colors
-  static const warmSand = Color(0xFFF5E6D3);
-  static const richBrown = Color(0xFF6B4423);
-  static const deepTerracotta = Color(0xFF8B4513);
-  static const earthGreen = Color(0xFF4A7C59);
-  static const sunsetOrange = Color(0xFFD2691E);
-  static const softCream = Color(0xFFFFF8E7);
-  static const textDark = Color(0xFF3E2723);
-  static const textLight = Color(0xFF8D6E63);
-  static const accentGold = Color(0xFFD4AF37);
 
   @override
   void initState() {
@@ -97,7 +190,7 @@ class _SplashLoadingPageState extends State<SplashLoadingPage>
 
   @override
   Widget build(BuildContext context) {
-    // Navigate when initialized
+    // Navigate when initialized (unless keeping splash visible for development)
     if (_isInitialized) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).pushReplacement(
@@ -114,6 +207,8 @@ class _SplashLoadingPageState extends State<SplashLoadingPage>
     }
 
     return Scaffold(
+      appBar: KivuliAppBar(),      backgroundColor: Colors.white,
+
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -131,28 +226,14 @@ class _SplashLoadingPageState extends State<SplashLoadingPage>
           child: FadeTransition(
             opacity: _fadeAnimation,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Spacer(flex: 2),
-                
-                // Animated Logo
-                ScaleTransition(
-                  scale: _scaleAnimation,
-                  child: _buildLogo(),
-                ),
+                            // Animated Logo
+               
                 
                 const SizedBox(height: 32),
                 
-                // App Name with subtle animation
-                _buildAppName(),
-                
-                const SizedBox(height: 12),
-                
-                // Tagline
-                _buildTagline(),
-                
-                const Spacer(flex: 2),
-                
-                // Loading Animation
+              
                 _buildLoadingAnimation(),
                 
                 const SizedBox(height: 24),
@@ -160,12 +241,7 @@ class _SplashLoadingPageState extends State<SplashLoadingPage>
                 // Loading Text
                 _buildLoadingText(),
                 
-                const Spacer(flex: 1),
-                
-                // Footer
-                _buildFooter(),
-                
-                const SizedBox(height: 24),
+                const SizedBox(height: 14),
               ],
             ),
           ),
@@ -173,115 +249,7 @@ class _SplashLoadingPageState extends State<SplashLoadingPage>
       ),
     );
   }
-
-  Widget _buildLogo() {
-    return Container(
-      width: 120,
-      height: 120,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [deepTerracotta, richBrown],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: deepTerracotta.withOpacity(0.4),
-            blurRadius: 30,
-            offset: const Offset(0, 12),
-            spreadRadius: 2,
-          ),
-          BoxShadow(
-            color: sunsetOrange.withOpacity(0.2),
-            blurRadius: 40,
-            offset: const Offset(0, 0),
-            spreadRadius: 10,
-          ),
-        ],
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Inner glow
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  softCream.withOpacity(0.1),
-                  Colors.transparent,
-                ],
-              ),
-            ),
-          ),
-          // Icon
-          const Icon(
-            Icons.home_rounded,
-            size: 56,
-            color: softCream,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAppName() {
-    return ShaderMask(
-      shaderCallback: (bounds) => const LinearGradient(
-        colors: [textDark, richBrown, deepTerracotta],
-        stops: [0.0, 0.5, 1.0],
-      ).createShader(bounds),
-      child: const Text(
-        'Tanzania BnB',
-        style: TextStyle(
-          fontSize: 36,
-          fontWeight: FontWeight.w800,
-          color: Colors.white,
-          letterSpacing: -1,
-          height: 1.1,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTagline() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: earthGreen.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: earthGreen.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.location_on_outlined,
-            size: 16,
-            color: earthGreen,
-          ),
-          SizedBox(width: 6),
-          Text(
-            'Your Home Away From Home',
-            style: TextStyle(
-              fontSize: 14,
-              color: earthGreen,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.3,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLoadingAnimation() {
+ Widget _buildLoadingAnimation() {
     return AnimatedBuilder(
       animation: _spinController,
       builder: (context, child) {
@@ -289,7 +257,7 @@ class _SplashLoadingPageState extends State<SplashLoadingPage>
           width: 80,
           height: 80,
           child: CustomPaint(
-            painter: _TanzaniaSpinnerPainter(
+            painter: LoadingDots(
               progress: _spinController.value,
               terracotta: deepTerracotta,
               green: earthGreen,
@@ -353,62 +321,16 @@ class _SplashLoadingPageState extends State<SplashLoadingPage>
     );
   }
 
-  Widget _buildFooter() {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildFooterIcon(Icons.bed_rounded),
-            const SizedBox(width: 24),
-            _buildFooterIcon(Icons.map_outlined),
-            const SizedBox(width: 24),
-            _buildFooterIcon(Icons.favorite_outline_rounded),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Discover • Book • Enjoy',
-          style: TextStyle(
-            fontSize: 12,
-            color: textLight.withOpacity(0.7),
-            fontWeight: FontWeight.w500,
-            letterSpacing: 1.5,
-          ),
-        ),
-      ],
-    );
-  }
+ }
 
-  Widget _buildFooterIcon(IconData icon) {
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.6),
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: earthGreen.withOpacity(0.2),
-          width: 1.5,
-        ),
-      ),
-      child: Icon(
-        icon,
-        size: 22,
-        color: earthGreen.withOpacity(0.8),
-      ),
-    );
-  }
-}
-
-class _TanzaniaSpinnerPainter extends CustomPainter {
+class LoadingDots extends CustomPainter {
   final double progress;
   final Color terracotta;
   final Color green;
   final Color orange;
   final Color gold;
 
-  _TanzaniaSpinnerPainter({
+  LoadingDots({
     required this.progress,
     required this.terracotta,
     required this.green,
@@ -476,7 +398,7 @@ class _TanzaniaSpinnerPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_TanzaniaSpinnerPainter oldDelegate) {
+  bool shouldRepaint(LoadingDots oldDelegate) {
     return oldDelegate.progress != progress;
   }
 }

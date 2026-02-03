@@ -60,6 +60,11 @@ class HomeLayout extends StatelessWidget {
       backgroundColor: warmSand,
       extendBodyBehindAppBar: true,
       appBar: KivuliAppBar(),
+      floatingActionButton: _RegionFab(
+        displayRegion: displayRegion,
+        isDropdownOpen: isDropdownOpen,
+        onToggleDropdown: onToggleDropdown,
+      ),
       body: Stack(
         children: [
           NotificationListener<ScrollNotification>(
@@ -150,56 +155,6 @@ class HomeLayout extends StatelessWidget {
                                 },
                               ),
                             ],
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          // ------------------------
-                          // REGION DROPDOWN
-                          // ------------------------
-                          GestureDetector(
-                            onTap: onToggleDropdown,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color: softCream,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.location_on,
-                                        color: deepTerracotta,
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Text(
-                                        displayRegion,
-                                        style: const TextStyle(
-                                          color: textDark,
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  AnimatedRotation(
-                                    turns: isDropdownOpen ? 0.5 : 0,
-                                    duration: const Duration(milliseconds: 200),
-                                    child: const Icon(
-                                      Icons.keyboard_arrow_down,
-                                      color: textDark,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ),
                         ],
                       ),
@@ -417,16 +372,13 @@ class HomeLayout extends StatelessWidget {
           if (isDropdownOpen)
             Builder(
               builder: (context) {
-                // Calculate dropdown width to match button width
-                // Button is now full width (minus horizontal padding)
                 final screenWidth = MediaQuery.of(context).size.width;
-                const horizontalPadding =
-                    20.0; // left and right padding from parent
-                final dropdownWidth = screenWidth - (horizontalPadding * 2);
+                final dropdownWidth = (screenWidth - 32).clamp(0.0, 320.0);
 
                 return Positioned(
-                  top: MediaQuery.of(context).padding.top + 140,
-                  left: horizontalPadding,
+                  right: 16,
+                  bottom: 88,
+                  width: dropdownWidth,
                   child: Material(
                     color: Colors.transparent,
                     child: Container(
@@ -505,16 +457,100 @@ class HomeLayout extends StatelessWidget {
   }
 }
 
+class _RegionFab extends StatelessWidget {
+  final String displayRegion;
+  final bool isDropdownOpen;
+  final VoidCallback onToggleDropdown;
+
+  const _RegionFab({
+    required this.displayRegion,
+    required this.isDropdownOpen,
+    required this.onToggleDropdown,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: deepTerracotta.withOpacity(0.35),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: richBrown.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onToggleDropdown,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [deepTerracotta, richBrown],
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.location_on_rounded,
+                  color: softCream,
+                  size: 24,
+                ),
+                const SizedBox(width: 10),
+                Flexible(
+                  child: Text(
+                    displayRegion,
+                    style: const TextStyle(
+                      color: softCream,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                AnimatedRotation(
+                  turns: isDropdownOpen ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 200),
+                  child: const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: softCream,
+                    size: 24,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _FixedHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
 
   _FixedHeaderDelegate({required this.child});
 
   @override
-  double get minExtent => 200;
+  double get minExtent => 120;
 
   @override
-  double get maxExtent => 200;
+  double get maxExtent => 120;
 
   @override
   Widget build(

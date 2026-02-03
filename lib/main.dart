@@ -2,7 +2,7 @@ import 'package:bnbfrontendflutter/auth/loginpage.dart';
 import 'package:bnbfrontendflutter/bnb/dashboard.dart';
 import 'package:bnbfrontendflutter/l10n/app_localizations.dart';
 import 'package:bnbfrontendflutter/l10n/languagemanagemen.dart';
-import 'package:bnbfrontendflutter/loading.dart';
+import 'package:bnbfrontendflutter/layouts/loading.dart';
 import 'package:bnbfrontendflutter/services/api_client.dart';
 import 'package:bnbfrontendflutter/services/deep_link_service.dart';
 import 'package:bnbfrontendflutter/services/favorites_service.dart';
@@ -95,7 +95,7 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       navigatorKey: navigatorKey,
-      title: 'Tanzania BnB',
+      title: 'BnB',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF8B4513), // deepTerracotta
@@ -108,7 +108,7 @@ class _MyAppState extends State<MyApp> {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       debugShowCheckedModeBanner: false,
       home: _showSplash
-          ? SplashLoadingPage(
+          ? Loading.splashLoading(
               onInit: _initializeApp,
               onComplete: (isLoggedIn) {
                 // Mark splash as complete

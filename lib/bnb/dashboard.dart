@@ -51,8 +51,8 @@ class _DashboardState extends State<Dashboard> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(
-                  icon: Icons.home_rounded,
-                  label: 'Home',
+                  icon: Icons.explore_outlined,
+                  label: 'Discover',
                   index: 0,
                 ),
                 _buildNavItem(icon: Icons.map_rounded, label: 'Map', index: 1),

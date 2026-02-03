@@ -1,5 +1,6 @@
 import 'package:bnbfrontendflutter/l10n/app_localizations.dart';
 import 'package:bnbfrontendflutter/l10n/languagemanagemen.dart';
+import 'package:bnbfrontendflutter/layouts/loading.dart';
 import 'package:bnbfrontendflutter/services/google_auth_sign.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
 import 'package:bnbfrontendflutter/utility/componet.dart';
@@ -205,7 +206,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       height: 56,
       child: ElevatedButton(
         onPressed: () async {
-          AlertReturn.showLoadingDialog(context);
+          Loading.showLoadingDialog(context);
 
           try {
             await _signInManager.signInWithGoogle(context);
@@ -228,8 +229,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           children: [
             Image.asset(
               'assets/icons/google.png',
-              width: 20,
-              height: 20,
+              width: 28,
+              height: 28,
               errorBuilder: (context, error, stackTrace) =>
                   const Icon(Icons.g_mobiledata, color: Colors.white, size: 24),
             ),
