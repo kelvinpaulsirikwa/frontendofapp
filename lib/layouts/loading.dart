@@ -5,6 +5,11 @@ import 'dart:math' as math;
 
 class Loading {
   const Loading._(); // prevents instantiation
+
+  static Widget infiniteLoading(BuildContext context) {
+    return const LoadingAnimationWidget(size: 80);
+  }
+
    static void showLoadingDialog(BuildContext context) {
     showDialog(
       context: context,

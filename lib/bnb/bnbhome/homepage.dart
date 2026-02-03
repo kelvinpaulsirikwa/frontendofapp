@@ -1,4 +1,5 @@
 import 'package:bnbfrontendflutter/bnb/bnbhome/ui.dart';
+import 'package:bnbfrontendflutter/layouts/loading.dart';
 import 'package:bnbfrontendflutter/services/home_data_service.dart';
 import 'package:bnbfrontendflutter/services/region_service.dart';
 import 'package:bnbfrontendflutter/services/location_service.dart';
@@ -245,20 +246,8 @@ class _HomePageState extends State<HomePage>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      AnimatedBuilder(
-                        animation: _controller,
-                        builder: (context, child) {
-                          return CustomPaint(
-                            size: const Size(60, 60),
-                            painter: TanzanianLoadingPainter(
-                              animationValue: _controller.value,
-                              terracotta: deepTerracotta,
-                              green: earthGreen,
-                              orange: sunsetOrange,
-                            ),
-                          );
-                        },
-                      ),
+                       Loading.infiniteLoading(context),
+                      
                       const SizedBox(height: 16),
                       Text(
                         local.homeLoadingLabel,

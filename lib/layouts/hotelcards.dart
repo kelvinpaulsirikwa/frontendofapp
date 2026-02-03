@@ -2,6 +2,8 @@ import 'package:bnbfrontendflutter/bnb/bnbhome/bnbdetails.dart';
 import 'package:bnbfrontendflutter/bnb/bnbhome/bnbroomdetails.dart';
 import 'package:bnbfrontendflutter/bnb/bookingpage/booking.dart';
 import 'package:bnbfrontendflutter/bnb/reusablecomponent/buttons.dart';
+import 'package:bnbfrontendflutter/layouts/alertmodal.dart';
+import 'package:bnbfrontendflutter/layouts/message.dart';
 import 'package:bnbfrontendflutter/services/favorites_service.dart';
 import 'package:bnbfrontendflutter/services/location_service.dart';
 import 'package:bnbfrontendflutter/models/bnb_motels_details_model.dart';
@@ -602,44 +604,21 @@ class FavoriteToggleButton extends StatelessWidget {
 
         return GestureDetector(
           onTap: () async {
-            final messenger = ScaffoldMessenger.maybeOf(context);
-
             if (isFavorite) {
-              final confirm =
-                  await showDialog<bool>(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      title: Text(
-                        'Remove "${motel.name}" from your favorites?',
-                      ),
-
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(ctx, false),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(ctx, true),
-                          child: const Text('Remove'),
-                        ),
-                      ],
-                    ),
-                  ) ??
-                  false;
-              if (!confirm) return;
+              final confirm = await AlertModal.showConfirm(
+                context,
+                title: 'Remove "${motel.name}" from your favorites?',
+                confirmText: 'Remove',
+                cancelText: 'Cancel',
+              );
+              if (confirm != true) return;
             }
 
             final added = await FavoritesService.toggleFavorite(motel);
-            messenger
-              ?..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: Text(
-                    '${motel.name} ${added ? 'added to' : 'removed from'} favorites',
-                  ),
-                  duration: const Duration(seconds: 2),
-                ),
-              );
+            Message.showSnackBar(
+              context,
+              '${motel.name} ${added ? 'added to' : 'removed from'} favorites',
+            );
           },
           child: Container(
             padding: const EdgeInsets.all(8),

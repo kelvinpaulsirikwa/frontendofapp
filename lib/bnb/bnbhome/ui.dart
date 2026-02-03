@@ -2,6 +2,7 @@ import 'package:bnbfrontendflutter/bnb/bnbhome/favorite.dart';
 import 'package:bnbfrontendflutter/layouts/hotelcards.dart';
 import 'package:bnbfrontendflutter/bnb/reusablecomponent/layout.dart';
 import 'package:bnbfrontendflutter/bnb/searching/homesearching.dart';
+import 'package:bnbfrontendflutter/layouts/loading.dart';
 import 'package:bnbfrontendflutter/utility/componet.dart';
 import 'package:bnbfrontendflutter/utility/errorcontentretry.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
@@ -329,7 +330,7 @@ class HomeLayout extends StatelessWidget {
                   )
                 else
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 4),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate((context, index) {
                         if (index < popular.length) {
@@ -342,12 +343,10 @@ class HomeLayout extends StatelessWidget {
 
                         // Loading indicator at the bottom
                         if (isLoadingMore) {
-                          return const Padding(
-                            padding: EdgeInsets.all(16.0),
+                          return Padding(
+                            padding: const EdgeInsets.all(16.0),
                             child: Center(
-                              child: CircularProgressIndicator(
-                                color: deepTerracotta,
-                              ),
+                              child:Loading.infiniteLoading(context),
                             ),
                           );
                         }
@@ -438,7 +437,7 @@ class _RegionBottomSheetContent extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
             child: Row(
               children: [
-                Icon(Icons.location_on_rounded, color: deepTerracotta, size: 24),
+                const Icon(Icons.location_on_rounded, color: deepTerracotta, size: 24),
                 const SizedBox(width: 10),
                 Text(
                   local.homeAllRegions,
