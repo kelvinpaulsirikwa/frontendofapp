@@ -1,5 +1,5 @@
 import 'package:bnbfrontendflutter/bnb/bnbhome/favorite.dart';
-import 'package:bnbfrontendflutter/bnb/reusablecomponent/hotelcards.dart';
+import 'package:bnbfrontendflutter/layouts/hotelcards.dart';
 import 'package:bnbfrontendflutter/bnb/reusablecomponent/layout.dart';
 import 'package:bnbfrontendflutter/bnb/searching/homesearching.dart';
 import 'package:bnbfrontendflutter/utility/componet.dart';
@@ -258,14 +258,7 @@ class HomeLayout extends StatelessWidget {
                                 icon: Icons.location_on,
                                 text: local.homeNearByTitle,
                               ),
-                              Text(
-                                local.homeViewAll,
-                                style: const TextStyle(
-                                  color: deepTerracotta,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              
                             ],
                           ),
                         ],

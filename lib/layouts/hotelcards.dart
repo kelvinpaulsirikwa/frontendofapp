@@ -23,7 +23,8 @@ class HotelCards {
       onTap: () {
         NavigationUtil.pushTo(context, BnBDetails(motel: motel));
       },
-      child: Container(
+      child: SingleChildScrollView(
+        child: Container(
         width: 250,
         margin: const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
@@ -102,252 +103,303 @@ class HotelCards {
                 ],
               ),
             ),
+          SingleChildScrollView(
+  child: Padding(
+    padding: const EdgeInsets.all(12),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Motel name
+        Text(
+          motel.name,
+          style: const TextStyle(
+            color: textDark,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+        ),
+        const SizedBox(height: 6),
+
+        // Address row
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.location_on_outlined,
+              size: 15,
+              color: textLight,
+            ),
+            const SizedBox(width: 4),
             Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        motel.name,
-                        style: const TextStyle(
-                          color: textDark,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.location_on_outlined,
-                            size: 15,
-                            color: textLight,
-                          ),
-                          const SizedBox(width: 4),
-                          Flexible(
-                            child: Text(
-                              '${motel.streetAddress}, ${motel.district}',
-                              style: const TextStyle(
-                                color: textLight,
-                                fontSize: 16,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.directions_sharp,
-                            size: 14,
-                            color: textLight,
-                          ),
-                          const SizedBox(width: 4),
-                          Flexible(
-                            child: FutureBuilder<Position?>(
-                              future: LocationService.getCurrentLocation(),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return const Text(
-                                    'Calculating...',
-                                    style: TextStyle(
-                                      color: textLight,
-                                      fontSize: 12,
-                                    ),
-                                  );
-                                }
-
-                                if (snapshot.hasError ||
-                                    !snapshot.hasData ||
-                                    snapshot.data == null) {
-                                  return const Text(
-                                    'Distance unavailable',
-                                    style: TextStyle(
-                                      color: textLight,
-                                      fontSize: 12,
-                                    ),
-                                  );
-                                }
-
-                                if (motel.latitude == null ||
-                                    motel.longitude == null) {
-                                  return const Text(
-                                    'Location unavailable',
-                                    style: TextStyle(
-                                      color: textLight,
-                                      fontSize: 12,
-                                    ),
-                                  );
-                                }
-
-                                final currentPosition = snapshot.data!;
-                                final distance =
-                                    DistanceCalculator.calculateDistance(
-                                      currentPosition.latitude,
-                                      currentPosition.longitude,
-                                      motel.latitude!,
-                                      motel.longitude!,
-                                    );
-                                final formattedDistance =
-                                    DistanceCalculator.formatDistance(distance);
-
-                                return Text(
-                                  '$formattedDistance away',
-                                  style: const TextStyle(
-                                    color: textLight,
-                                    fontSize: 12,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+              child: Text(
+                '${motel.streetAddress}, ${motel.district}',
+                style: const TextStyle(
+                  color: textLight,
+                  fontSize: 14,
                 ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
+          ],
+        ),
+        const SizedBox(height: 6),
+
+        // Distance and View button row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Distance info
+            Row(
+              children: [
+                const Icon(
+                  Icons.directions_sharp,
+                  size: 14,
+                  color: textLight,
+                ),
+                const SizedBox(width: 4),
+                SizedBox(
+                  width: 120, // Fixed width to prevent overflow
+                  child: FutureBuilder<Position?>(
+                    future: LocationService.getCurrentLocation(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Text(
+                          'Calculating...',
+                          style: TextStyle(color: textLight, fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        );
+                      }
+
+                      if (snapshot.hasError ||
+                          !snapshot.hasData ||
+                          snapshot.data == null ||
+                          motel.latitude == null ||
+                          motel.longitude == null) {
+                        return const Text(
+                          'Distance unavailable',
+                          style: TextStyle(color: textLight, fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        );
+                      }
+
+                      final currentPosition = snapshot.data!;
+                      final distance = DistanceCalculator.calculateDistance(
+                        currentPosition.latitude,
+                        currentPosition.longitude,
+                        motel.latitude!,
+                        motel.longitude!,
+                      );
+                      final formattedDistance = DistanceCalculator.formatDistance(distance);
+
+                      return Text(
+                        '$formattedDistance away',
+                        style: const TextStyle(color: textLight, fontSize: 12),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+
+            // View button
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: earthGreen, width: 1.5),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'View',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: earthGreen,
+                    ),
+                  ),
+                  SizedBox(width: 2),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 12,
+                    color: earthGreen,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  ),
+)
+
           ],
         ),
       ),
-    );
+    ));
   }
 
-  static Widget verticalHotelCard({
-    required SimpleMotel motel,
-    required BuildContext context,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        NavigationUtil.pushTo(context, BnBDetails(motel: motel));
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          color: softCream,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: richBrown.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
+static Widget verticalHotelCard({
+  required SimpleMotel motel,
+  required BuildContext context,
+}) {
+  return Container(
+    margin: const EdgeInsets.only(bottom: 16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.04),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
         ),
+      ],
+    ),
+    child: Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: () => NavigationUtil.pushTo(context, BnBDetails(motel: motel)),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(14),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 125,
-                height: 125,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      earthGreen.withOpacity(0.3),
-                      sunsetOrange.withOpacity(0.3),
-                    ],
+              // Left: Hotel Image
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      width: 90,
+                      height: 90,
+                      child: motel.frontImage != null && motel.frontImage!.isNotEmpty
+                          ? Showimage.networkImage(imageUrl: motel.frontImage!)
+                          : Container(
+                              color: earthGreen.withOpacity(0.1),
+                              child: const Icon(Icons.hotel, size: 32, color: earthGreen),
+                            ),
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Stack(
-                  children: [
-                    SizedBox(
-                      height: double.infinity,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Showimage.networkImage(
-                          imageUrl: motel.frontImage.toString(),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 12,
-                      right: 12,
-                      child: FavoriteToggleButton(motel: motel),
-                    ),
-                  ],
-                ),
+                  // Favorite toggle
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: FavoriteToggleButton(motel: motel),
+                  ),
+                ],
               ),
-
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
+              // Right: Content
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      motel.name,
-                      style: const TextStyle(
-                        color: textDark,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${motel.streetAddress}, ${motel.district} ',
-                      style: const TextStyle(color: textLight, fontSize: 13),
-                    ),
-                    const SizedBox(height: 8),
+                    // Motel type badge + Name
                     Row(
                       children: [
-                        Flexible(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 3,
+                       
+                        const SizedBox(width: 0.18),
+                        Expanded(
+                          child: Text(
+                            motel.name,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1A1A2E),
+                              height: 1.2,
                             ),
-                            decoration: BoxDecoration(
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    // Address
+                    Text(
+                      '${motel.streetAddress}, ${motel.district}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    // Rating or additional info (optional)
+                   
+                   Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: earthGreen.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            motel.motelType,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
                               color: earthGreen,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.star,
-                                  size: 10,
-                                  color: sunsetOrange,
-                                ),
-                                const SizedBox(width: 2),
-                                Text(
-                                  (motel.motelType),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
                             ),
                           ),
                         ),
-                        const SizedBox(width: 6),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: earthGreen, width: 1.5),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'View',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: earthGreen,
+                                ),
+                              ),
+                              SizedBox(width: 2),
+                              Icon(
+                                Icons.arrow_forward_rounded,
+                                size: 12,
+                                color: earthGreen,
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
-                    ),
-                    const SizedBox(height: 6),
-                  ],
+                    ), 
+                   
+                   ],
                 ),
               ),
             ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   static Widget verticalHotelRooms({
     required BnbMotelsDetailsModel motelsDetailsModel,

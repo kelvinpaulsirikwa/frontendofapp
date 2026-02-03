@@ -1,4 +1,4 @@
-import 'package:bnbfrontendflutter/bnb/reusablecomponent/hotelcards.dart';
+import 'package:bnbfrontendflutter/layouts/hotelcards.dart';
 import 'package:bnbfrontendflutter/services/favorites_service.dart';
 import 'package:bnbfrontendflutter/utility/appbar.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
