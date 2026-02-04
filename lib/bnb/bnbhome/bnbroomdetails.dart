@@ -691,19 +691,19 @@ class _BnBRoomDetailsState extends State<BnBRoomDetails>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             TextWidgets.simpleText(
-                              text: 'BnB name: ${widget.motelsDetailsModel.name}',
+                              text: 'Name: ${widget.motelsDetailsModel.name}',
                             ),
                             const SizedBox(height: 12),
                             TextWidgets.simpleText(
-                              text: 'BnB type: ${widget.motelsDetailsModel.motelType}',
+                              text: 'Type: ${widget.motelsDetailsModel.motelType}',
                             ),
                             const SizedBox(height: 12),
                             TextWidgets.simpleText(
-                              text: 'Bnb District: ${widget.motelsDetailsModel.district}',
+                              text: 'District: ${widget.motelsDetailsModel.district}',
                             ),
                             const SizedBox(height: 12),
                             TextWidgets.simpleText(
-                              text: 'BnB address: ${widget.motelsDetailsModel.streetAddress}',
+                              text: 'Address: ${widget.motelsDetailsModel.streetAddress}',
                             ),
                             const SizedBox(height: 12),
                             TextWidgets.simpleText(
