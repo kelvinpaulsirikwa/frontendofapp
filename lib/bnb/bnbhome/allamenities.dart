@@ -1,8 +1,10 @@
+import 'package:bnbfrontendflutter/bnb/bnbhome/amenitiesimages.dart';
 import 'package:bnbfrontendflutter/models/bnb_motels_details_model.dart';
 import 'package:bnbfrontendflutter/services/motel_detail_service.dart';
 import 'package:bnbfrontendflutter/bnb/reusablecomponent/iconslist.dart';
 import 'package:bnbfrontendflutter/utility/appbar.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
+import 'package:bnbfrontendflutter/utility/navigateutility.dart';
 import 'package:flutter/material.dart';
 
 class BnBAllAmenities extends StatefulWidget {
@@ -114,65 +116,71 @@ class _BnBAllAmenitiesState extends State<BnBAllAmenities> {
                     }
 
                     final amenity = _amenities[index];
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: richBrown.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: earthGreen.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              AmenityIcons.getIcon(amenity.name),
-                              color: earthGreen,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  amenity.name,
-                                  style: const TextStyle(
-                                    color: textDark,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
+                      return GestureDetector(
+                        onTap: () =>NavigationUtil.pushwithslideTo(
+                                          context,
+                                          AmenitiesImages(amenity: amenity),
                                   ),
-                                ),
-                                if (amenity.description != null) ...[
-                                  const SizedBox(height: 4),
+                        child: Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: richBrown.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: earthGreen.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                AmenityIcons.getIcon(amenity.name),
+                                color: earthGreen,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Text(
-                                    amenity.description!,
-                                    style: TextStyle(
-                                      color: textDark.withOpacity(0.7),
-                                      fontSize: 14,
+                                    amenity.name,
+                                    style: const TextStyle(
+                                      color: textDark,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
+                                  if (amenity.description != null) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      amenity.description!,
+                                      style: TextStyle(
+                                        color: textDark.withOpacity(0.7),
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
                                 ],
-                              ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                          ],
+                        ),
+                      )
+                    ,
+                      );},
                 ),
               ),
             ),

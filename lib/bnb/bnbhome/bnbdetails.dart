@@ -133,22 +133,6 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
     _loadingController.dispose();
     super.dispose();
   }
-
-  void _showAmenityDetails(BuildContext context, BnbAmenityModel amenity) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.3,
-        maxChildSize: 0.9,
-        builder: (context, scrollController) =>
-            AmenitiesImages(amenity: amenity),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     // Show error state
@@ -669,10 +653,13 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
                                       final amenity = _amenities[index];
                                       return AmenityCard(
                                         amenity: amenity,
-                                        onTap: () => _showAmenityDetails(
+                                        onTap: () =>NavigationUtil.pushwithslideTo(
                                           context,
-                                          amenity,
+                                          AmenitiesImages(amenity: amenity),
                                         ),
+                                        
+                                        
+                                        
                                         margin: EdgeInsets.zero,
                                       );
                                     }),
