@@ -41,6 +41,30 @@ class RoomDetailService {
     }
   }
 
+  /// Paging version - returns raw API response for BnBRoomImages
+  static Future<Map<String, dynamic>> getRoomImagesPaging(
+    int roomId, {
+    int page = 1,
+    int limit = 10,
+    BuildContext? context,
+  }) async {
+    debugPrint('Fetching paging room images for: $roomId');
+
+    final queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
+
+    final response = await ApiClient.get(
+      '/rooms/$roomId/images',
+      context: context,
+      queryParams: queryParams,
+    );
+
+    debugPrint('Room Images Paging Response: $response');
+    return response;
+  }
+
   static Future<List<RoomItemModel>> getRoomItems(
     int roomId, {
     int page = 1,

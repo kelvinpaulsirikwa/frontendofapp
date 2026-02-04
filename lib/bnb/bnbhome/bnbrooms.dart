@@ -1,5 +1,6 @@
 import 'package:bnbfrontendflutter/layouts/hotelcards.dart';
 import 'package:bnbfrontendflutter/bnb/reusablecomponent/layout.dart';
+import 'package:bnbfrontendflutter/layouts/loading.dart';
 import 'package:bnbfrontendflutter/models/bnb_motels_details_model.dart';
 import 'package:bnbfrontendflutter/utility/appbar.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
@@ -248,20 +249,8 @@ class _BnBRoomsState extends State<BnBRooms> with TickerProviderStateMixin {
           Expanded(
             child: _isLoading && _rooms.isEmpty
                 ? Center(
-                    child: AnimatedBuilder(
-                      animation: _loadingController,
-                      builder: (context, child) {
-                        return CustomPaint(
-                          size: const Size(60, 60),
-                          painter: TanzanianLoadingPainter(
-                            animationValue: _loadingController.value,
-                            terracotta: deepTerracotta,
-                            green: earthGreen,
-                            orange: sunsetOrange,
-                          ),
-                        );
-                      },
-                    ),
+                    child: 
+                    Loading.infiniteLoading(context),
                   )
                 : ListView.builder(
                     controller: _scrollController,

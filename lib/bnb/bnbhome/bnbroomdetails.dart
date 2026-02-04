@@ -1,3 +1,4 @@
+import 'package:bnbfrontendflutter/bnb/bnbhome/bnbroomimages.dart';
 import 'package:bnbfrontendflutter/bnb/reusablecomponent/layout.dart';
 import 'package:bnbfrontendflutter/models/bnb_motels_details_model.dart';
 import 'package:bnbfrontendflutter/models/bnbroommodel.dart';
@@ -30,6 +31,7 @@ class _BnBRoomDetailsState extends State<BnBRoomDetails>
     with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   bool _showTitle = false;
+  bool _isInfoExpanded = false;
   bool _isLoading = true;
   bool _hasError = false;
   String _errorMessage = '';
@@ -70,7 +72,7 @@ class _BnBRoomDetailsState extends State<BnBRoomDetails>
     try {
       // Load room details, images, and items in parallel
       final results = await Future.wait([
-        RoomDetailService.getRoomImages(widget.room.id, page: 1, limit: 5),
+        RoomDetailService.getRoomImages(widget.room.id, page: 1, limit: 10),
         RoomDetailService.getRoomItems(widget.room.id, page: 1, limit: 10),
       ]);
 
@@ -98,93 +100,15 @@ class _BnBRoomDetailsState extends State<BnBRoomDetails>
   }
 
   void _showAllImages(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: softCream,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 12),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: richBrown.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'All Room Images (${_images.length})',
-                      style: const TextStyle(
-                        color: textDark,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: richBrown.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.close,
-                          color: richBrown,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: GridView.builder(
-                  controller: scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 1,
-                  ),
-                  itemCount: _images.length,
-                  itemBuilder: (context, index) {
-                    final image = _images[index];
-                    return GestureDetector(
-                      onTap: () => Showimage.showFullScreenImage(
-                        context,
-                        image.imageUrl,
-                        widget.room.roomnumber,
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Showimage.networkImage(imageUrl: image.imageUrl),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
+    NavigationUtil.pushwithslideTo(
+      context,
+      BnBRoomImages(
+        roomId: widget.room.id,
+        roomNumber: widget.room.roomnumber,
+        initialImages: _images,
       ),
     );
+    
   }
 
   @override
@@ -268,6 +192,19 @@ class _BnBRoomDetailsState extends State<BnBRoomDetails>
               ],
             ),
             actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 4.0),
+                child: IconContainer(
+                  icon: Icons.info,
+                  backgroundColor: softCream,
+                  iconColor: richBrown,
+                  onTap: () {
+                    setState(() {
+                      _isInfoExpanded = !_isInfoExpanded;
+                    });
+                  },
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.only(right: 8.0),
                 child: IconContainer(
@@ -405,191 +342,10 @@ class _BnBRoomDetailsState extends State<BnBRoomDetails>
                 ),
 
                 const SizedBox(height: 8),
-                Container(
-                  color: softCream,
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header
-                      TextWidgets.iconTextRow(
-                        icon: Icons.bed,
-                        text: 'Room Information',
-                      ),
-                      const SizedBox(height: 16),
 
-                      // Total Rooms
-                      TextWidgets.simpleText(
-                        text: 'BnB name: ${widget.motelsDetailsModel.name}',
-                      ),
-
-                      const SizedBox(height: 12),
-                      TextWidgets.simpleText(
-                        text:
-                            'BnB type: ${widget.motelsDetailsModel.motelType}',
-                      ),
-
-                      const SizedBox(height: 12),
-                      TextWidgets.simpleText(
-                        text:
-                            'Bnb District: ${widget.motelsDetailsModel.district}',
-                      ),
-
-                      const SizedBox(height: 12),
-                      TextWidgets.simpleText(
-                        text:
-                            'BnB address: ${widget.motelsDetailsModel.streetAddress}',
-                      ),
-
-                      const SizedBox(height: 12),
-                      TextWidgets.simpleText(
-                        text: 'Room Type: ${widget.room.roomtype}',
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // Available Rooms
-                      TextWidgets.simpleText(
-                        text: 'Available Rooms: ${widget.room.status}',
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Motel Type
-                      if (widget.motelsDetailsModel.contactPhone != null) ...[
-                        TextWidgets.simpleText(
-                          text:
-                              'Contact: ${widget.motelsDetailsModel.contactPhone}',
-                        ),
-                      ],
-
-                      if (widget.motelsDetailsModel.contactEmail != null) ...[
-                        const SizedBox(height: 12),
-                        TextWidgets.simpleText(
-                          text:
-                              'Email: ${widget.motelsDetailsModel.contactEmail}',
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Room Items Section
-                Container(
-                  color: softCream,
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextWidgets.iconTextRow(
-                        icon: Icons.room_service,
-                        text: 'Room Items',
-                      ),
-                      const SizedBox(height: 16),
-                      if (_isLoading)
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: warmSand,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: earthGreen.withOpacity(0.2),
-                              width: 1,
-                            ),
-                          ),
-                          child: Center(
-                            child: AnimatedBuilder(
-                              animation: _loadingController,
-                              builder: (context, child) {
-                                return CustomPaint(
-                                  size: const Size(40, 40),
-                                  painter: TanzanianLoadingPainter(
-                                    animationValue: _loadingController.value,
-                                    terracotta: deepTerracotta,
-                                    green: earthGreen,
-                                    orange: sunsetOrange,
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        )
-                      else if (_items.isEmpty)
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: warmSand,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: earthGreen.withOpacity(0.2),
-                              width: 1,
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'No room items available',
-                              style: TextStyle(
-                                color: textLight.withOpacity(0.7),
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        )
-                      else
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: _items
-                              .map(
-                                (item) => Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: earthGreen.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: earthGreen.withOpacity(0.3),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        item.name,
-                                        style: const TextStyle(
-                                          color: textDark,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      if (item.description != null) ...[
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          item.description!,
-                                          style: TextStyle(
-                                            color: textLight.withOpacity(0.8),
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Room Images Section
-                Container(
+ // Room Items Section
+               
+               Container(
                   color: softCream,
                   padding: const EdgeInsets.all(20),
                   child: Column(
@@ -780,6 +536,208 @@ class _BnBRoomDetailsState extends State<BnBRoomDetails>
                 ),
 
                 const SizedBox(height: 8),
+
+                // Room Items Section
+                Container(
+                  color: softCream,
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextWidgets.iconTextRow(
+                        icon: Icons.room_service,
+                        text: 'Room Items',
+                      ),
+                      const SizedBox(height: 16),
+                      if (_isLoading)
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: warmSand,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: earthGreen.withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: Center(
+                            child: AnimatedBuilder(
+                              animation: _loadingController,
+                              builder: (context, child) {
+                                return CustomPaint(
+                                  size: const Size(40, 40),
+                                  painter: TanzanianLoadingPainter(
+                                    animationValue: _loadingController.value,
+                                    terracotta: deepTerracotta,
+                                    green: earthGreen,
+                                    orange: sunsetOrange,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        )
+                      else if (_items.isEmpty)
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: warmSand,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: earthGreen.withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'No room items available',
+                              style: TextStyle(
+                                color: textLight.withOpacity(0.7),
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: _items
+                              .map(
+                                (item) => Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: earthGreen.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: earthGreen.withOpacity(0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item.name,
+                                        style: const TextStyle(
+                                          color: textDark,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      if (item.description != null) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          item.description!,
+                                          style: TextStyle(
+                                            color: textLight.withOpacity(0.8),
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                // Room Images Section
+              
+                   // Room Information Section (expandable, first)
+                Container(
+                  color: softCream,
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _isInfoExpanded = !_isInfoExpanded;
+                          });
+                        },
+                        behavior: HitTestBehavior.opaque,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextWidgets.iconTextRow(
+                                icon: Icons.bed,
+                                text: 'Room Information',
+                              ),
+                            ),
+                            Icon(
+                              _isInfoExpanded
+                                  ? Icons.keyboard_arrow_up
+                                  : Icons.keyboard_arrow_down,
+                              color: richBrown,
+                              size: 24,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      AnimatedCrossFade(
+                        firstChild: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextWidgets.simpleText(
+                              text: 'BnB name: ${widget.motelsDetailsModel.name}',
+                            ),
+                            const SizedBox(height: 12),
+                            TextWidgets.simpleText(
+                              text: 'BnB type: ${widget.motelsDetailsModel.motelType}',
+                            ),
+                            const SizedBox(height: 12),
+                            TextWidgets.simpleText(
+                              text: 'Bnb District: ${widget.motelsDetailsModel.district}',
+                            ),
+                            const SizedBox(height: 12),
+                            TextWidgets.simpleText(
+                              text: 'BnB address: ${widget.motelsDetailsModel.streetAddress}',
+                            ),
+                            const SizedBox(height: 12),
+                            TextWidgets.simpleText(
+                              text: 'Room Type: ${widget.room.roomtype}',
+                            ),
+                            const SizedBox(height: 12),
+                            TextWidgets.simpleText(
+                              text: 'Status: ${widget.room.status}',
+                            ),
+                            if (widget.motelsDetailsModel.contactPhone != null) ...[
+                              const SizedBox(height: 12),
+                              TextWidgets.simpleText(
+                                text: 'Contact: ${widget.motelsDetailsModel.contactPhone}',
+                              ),
+                            ],
+                            if (widget.motelsDetailsModel.contactEmail != null) ...[
+                              const SizedBox(height: 12),
+                              TextWidgets.simpleText(
+                                text: 'Email: ${widget.motelsDetailsModel.contactEmail}',
+                              ),
+                            ],
+                          ],
+                        ),
+                        secondChild: const SizedBox(width: double.infinity, height: 0),
+                        crossFadeState: _isInfoExpanded
+                            ? CrossFadeState.showFirst
+                            : CrossFadeState.showSecond,
+                        duration: const Duration(milliseconds: 300),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+
               ],
             ),
           ),
