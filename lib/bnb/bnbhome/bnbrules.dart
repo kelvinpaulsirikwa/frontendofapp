@@ -64,7 +64,7 @@ class _BnBRulesState extends State<BnBRules> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: softCream,
-      appBar: SingleMGAppBar("Rule of the House", context: context),
+      appBar: SingleMGAppBar("${widget.moteldetails.motelType} Rules", context: context),
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(color: earthGreen),
@@ -141,7 +141,7 @@ class _BnBRulesState extends State<BnBRules> {
                       color: earthGreen,
                       child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(7.5),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -254,7 +254,7 @@ class _BnBRulesState extends State<BnBRules> {
                               ),
                               child: Text(
                                 _bnbRule!.rules!,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 15,
                                   height: 1.6,
                                   color: textDark,

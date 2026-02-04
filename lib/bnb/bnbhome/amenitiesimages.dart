@@ -1,7 +1,6 @@
 import 'package:bnbfrontendflutter/layouts/loading.dart';
 import 'package:bnbfrontendflutter/models/bnb_motels_details_model.dart';
 import 'package:bnbfrontendflutter/services/amenititesimage.dart';
-import 'package:bnbfrontendflutter/utility/alert.dart';
 import 'package:bnbfrontendflutter/utility/appbar.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
 import 'package:bnbfrontendflutter/utility/errorcontentretry.dart';
@@ -40,8 +39,10 @@ class _AmenitiesImagesState extends State<AmenitiesImages> {
         page: _currentPage,
       );
 
-      if (response['success'] == true && response['data'] != null) {
-        final List<dynamic> imagesData = response['data'];
+      if (response['success'] == true) {
+        final rawData = response['data'];
+        final List<dynamic> imagesData =
+            rawData is List ? rawData : (rawData != null ? [rawData] : []);
         final List<AmenitiesAllImages> newImages = imagesData
             .map((item) => AmenitiesAllImages.fromJson(item))
             .toList();
@@ -52,7 +53,6 @@ class _AmenitiesImagesState extends State<AmenitiesImages> {
         });
       }
     } catch (e) {
-      AlertReturn.showToast('Error loading more images: $e');
       setState(() {
         _currentPage--; // Revert page increment on error
       });
@@ -84,8 +84,10 @@ class _AmenitiesImagesState extends State<AmenitiesImages> {
         page: _currentPage,
       );
 
-      if (response['success'] == true && response['data'] != null) {
-        final List<dynamic> imagesData = response['data'];
+      if (response['success'] == true) {
+        final rawData = response['data'];
+        final List<dynamic> imagesData =
+            rawData is List ? rawData : (rawData != null ? [rawData] : []);
         final List<AmenitiesAllImages> newImages = imagesData
             .map((item) => AmenitiesAllImages.fromJson(item))
             .toList();
@@ -101,12 +103,16 @@ class _AmenitiesImagesState extends State<AmenitiesImages> {
         });
       } else {
         setState(() {
-          _errorMessage = response['message'] ?? 'Failed to load images';
+          _errorMessage =
+              _parseErrorMessage(response, 'Failed to load images');
         });
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Error loading images: $e';
+        _errorMessage = _parseErrorMessage(
+          {'message': e.toString()},
+          'Failed to load images',
+        );
       });
     } finally {
       setState(() {
@@ -142,6 +148,23 @@ class _AmenitiesImagesState extends State<AmenitiesImages> {
     return (image.description ?? image.filepath).toString();
   }
 
+  String _parseErrorMessage(dynamic response, String fallback) {
+    final msg = response['message']?.toString() ?? '';
+    if (msg.contains('Connection closed') ||
+        msg.contains('Connection refused') ||
+        msg.contains('SocketException') ||
+        msg.contains('Network error')) {
+      return 'Connection failed. Check your network and try again.';
+    }
+    if (msg.contains('Invalid') ||
+        msg.contains('invalid') ||
+        msg.contains('bnb_amenities_id') ||
+        msg.contains('422')) {
+      return 'This amenity has no images or is no longer available.';
+    }
+    return msg.isNotEmpty ? msg : fallback;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -168,7 +191,7 @@ class _AmenitiesImagesState extends State<AmenitiesImages> {
       );
     }
 
-    if (_isLoading && _images.isEmpty) {
+    if ((_isLoading || _isLoadingMore) && _images.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
