@@ -16,6 +16,7 @@ import 'package:bnbfrontendflutter/utility/colors.dart';
 import 'package:bnbfrontendflutter/utility/distance_calculator.dart';
 import 'package:bnbfrontendflutter/utility/errorcontentretry.dart';
 import 'package:bnbfrontendflutter/utility/images.dart';
+import 'package:bnbfrontendflutter/layouts/message.dart';
 import 'package:bnbfrontendflutter/utility/loading.dart';
 import 'package:bnbfrontendflutter/utility/navigateutility.dart';
 import 'package:bnbfrontendflutter/utility/text.dart';
@@ -229,7 +230,6 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
                   backgroundColor: softCream,
                   iconColor: _isFavorite ? Colors.red : richBrown,
                   onTap: () async {
-                    final messenger = ScaffoldMessenger.maybeOf(context);
                     final added = await FavoritesService.toggleFavorite(
                       widget.motel,
                     );
@@ -237,19 +237,10 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
                     setState(() {
                       _isFavorite = added;
                     });
-                    if (messenger != null) {
-                      final message = added
-                          ? '${widget.motel.name} added to favorites'
-                          : '${widget.motel.name} removed from favorites';
-                      messenger
-                        ..hideCurrentSnackBar()
-                        ..showSnackBar(
-                          SnackBar(
-                            content: Text(message),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                    }
+                    final message = added
+                        ? '${widget.motel.name} added to favorites'
+                        : '${widget.motel.name} removed from favorites';
+                    Message.showSnackBar(context, message);
                   },
                 ),
               ),
@@ -640,7 +631,10 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
                               onTap: () {
                                 NavigationUtil.pushwithslideTo(
                                   context,
-                                  BnBAllAmenities(motelid: widget.motel.id),
+                                  BnBAllAmenities(
+                                    motelid: widget.motel.id,
+                                    initialAmenities: _amenities,
+                                  ),
                                 );
                               },
                             ),

@@ -1,12 +1,19 @@
 import 'package:bnbfrontendflutter/models/bnb_motels_details_model.dart';
 import 'package:bnbfrontendflutter/services/motel_detail_service.dart';
+import 'package:bnbfrontendflutter/bnb/reusablecomponent/iconslist.dart';
 import 'package:bnbfrontendflutter/utility/appbar.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
 import 'package:flutter/material.dart';
 
 class BnBAllAmenities extends StatefulWidget {
   final int motelid;
-  const BnBAllAmenities({super.key, required this.motelid});
+  final List<BnbAmenityModel>? initialAmenities;
+
+  const BnBAllAmenities({
+    super.key,
+    required this.motelid,
+    this.initialAmenities,
+  });
 
   @override
   State<BnBAllAmenities> createState() => _BnBAllAmenitiesState();
@@ -58,14 +65,21 @@ class _BnBAllAmenitiesState extends State<BnBAllAmenities> {
   @override
   void initState() {
     super.initState();
-    _loadMoreAmenities();
+    if (widget.initialAmenities != null &&
+        widget.initialAmenities!.isNotEmpty) {
+      _amenities.addAll(widget.initialAmenities!);
+      _currentAmenityPage = 1;
+      _hasMoreAmenities = widget.initialAmenities!.length >= 10;
+    } else {
+      _loadMoreAmenities();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: SingleMGAppBar(
-        "All Amenities (${_amenities.length})",
+        "All Amenities ",
         context: context,
       ),
       body: Container(
@@ -123,8 +137,8 @@ class _BnBAllAmenitiesState extends State<BnBAllAmenities> {
                               color: earthGreen.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(
-                              Icons.star_border,
+                            child: Icon(
+                              AmenityIcons.getIcon(amenity.name),
                               color: earthGreen,
                               size: 24,
                             ),

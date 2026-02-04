@@ -1,6 +1,8 @@
+import 'package:bnbfrontendflutter/layouts/loading.dart';
 import 'package:bnbfrontendflutter/services/motel_detail_service.dart';
 import 'package:bnbfrontendflutter/utility/alert.dart';
 import 'package:bnbfrontendflutter/utility/appbar.dart';
+import 'package:bnbfrontendflutter/utility/colors.dart';
 import 'package:bnbfrontendflutter/utility/errorcontentretry.dart';
 import 'package:bnbfrontendflutter/utility/images.dart';
 import 'package:flutter/material.dart';
@@ -167,72 +169,149 @@ class _BnBHotelImagesState extends State<BnBHotelImages> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SingleMGAppBar("All Images", context: context),
+      appBar: SingleMGAppBar(
+  'Showing ${_images.length} Images',
+  context: context,
+),
 
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: warmSand,
       body: _buildBody(),
     );
   }
 
   Widget _buildBody() {
-    // Show error if there's an error message
     if (_errorMessage != null && !_isLoading) {
-      return ErrorContent(
-        message: _errorMessage!,
-        color: Colors.red,
-        onRetry: () {
-          _loadImages(refresh: true);
-        },
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: ErrorContent(
+            message: _errorMessage!,
+            color: deepTerracotta,
+            onRetry: () => _loadImages(refresh: true),
+          ),
+        ),
       );
     }
 
-    // Show loading indicator
     if (_isLoading && _images.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    // Show empty state
-    if (_images.isEmpty) {
-      return ErrorContent(
-        message: 'No images found',
-        color: Colors.blue,
-        onRetry: () {
-          _loadImages(refresh: true);
-        },
+      return  Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Loading.infiniteLoading(context),
+            const SizedBox(height: 16),
+            const Text(
+              'Loading images...',
+              style: TextStyle(color: textLight, fontSize: 14),
+            ),
+          ],
+        ),
       );
     }
 
-    // Show images list ONLY
+    if (_images.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: ErrorContent(
+            message: 'No images found',
+            color: deepTerracotta,
+            onRetry: () => _loadImages(refresh: true),
+          ),
+        ),
+      );
+    }
+
+    final crossAxisCount = MediaQuery.of(context).size.width > 600 ? 3 : 2;
+
     return RefreshIndicator(
       onRefresh: () => _loadImages(refresh: true),
-      child: ListView.builder(
+      color: deepTerracotta,
+      child: CustomScrollView(
         controller: _scrollController,
-        padding: const EdgeInsets.all(16),
-        itemCount: _images.length + (_isLoadingMore ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index == _images.length) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: CircularProgressIndicator(),
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.all(12),
+            sliver: SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.85,
               ),
-            );
-          }
-
-          final image = _images[index];
-          return GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-              setState(() {});
-            },
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Showimage.networkImage(
-                imageUrl: image.fullImageUrl.toString(),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final image = _images[index];
+                  return _buildImageCard(image, index + 1);
+                },
+                childCount: _images.length,
               ),
             ),
-          );
-        },
+          ),
+          if (_isLoadingMore)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Center(child: Loading.infiniteLoading(context)),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImageCard(MotelImageModel image, int index) {
+    return GestureDetector(
+      onTap: () {
+        Showimage.showFullScreenImage(
+          context,
+          image.fullImageUrl.toString(),
+          "Image View",
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: richBrown.withOpacity(0.12),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Showimage.networkImage(
+                imageUrl: image.fullImageUrl.toString(),
+              ),
+              Positioned(
+                bottom: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '#$index',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
