@@ -2,15 +2,15 @@ import 'package:bnbfrontendflutter/utility/colors.dart';
 import 'package:flutter/material.dart';
 
 class AmenityCard extends StatelessWidget {
-  final dynamic amenity; // Replace 'dynamic' with your Amenity model
+  final dynamic amenity;
   final VoidCallback onTap;
-  final double width;
+  final EdgeInsetsGeometry margin;
 
   const AmenityCard({
     super.key,
     required this.amenity,
     required this.onTap,
-    this.width = 100,
+    this.margin = const EdgeInsets.only(right: 6),
   });
 
   @override
@@ -18,34 +18,29 @@ class AmenityCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: width,
-        margin: const EdgeInsets.only(right: 12),
-        decoration: BoxDecoration(
-          color: warmSand, // replace with warmSand
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: earthGreen.withOpacity(0.2), width: 1),
+        margin: margin,
+        padding: const EdgeInsets.symmetric(
+          horizontal: 8,
+          vertical: 4,
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Image or fallback icon
-            const Icon(Icons.star_border, color: Colors.green, size: 28),
-            const SizedBox(height: 6),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                amenity.name,
-                style: const TextStyle(
-                  color: Colors.black87, // replace with textDark
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+        decoration: BoxDecoration(
+          color: warmSand,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: earthGreen.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
+        child: Text(
+          amenity.name,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+            height: 1.1,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );

@@ -46,7 +46,7 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
 
   // Real data from API
   BnbMotelsDetailsModel? _motelDetail;
-  List<BnbImageModel> _images = [];
+  List<MotelImageModel> _images = [];
   List<BnbAmenityModel> _amenities = [];
 
   @override
@@ -89,10 +89,10 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
     });
 
     try {
-      // Load motel details, images, and amenities in parallel
+      // Load motel details, images (page 1, limit 10 for reuse in BnBHotelImages), and amenities in parallel
       final results = await Future.wait([
         MotelDetailService.getMotelDetails(widget.motel.id),
-        MotelDetailService.getMotelImages(widget.motel.id, page: 1, limit: 5),
+        MotelDetailService.getpaginghotelimage(widget.motel.id, page: 1, limit: 10),
         MotelDetailService.getMotelAmenities(
           widget.motel.id,
           page: 1,
@@ -100,9 +100,16 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
         ),
       ]);
 
+      final imagesResponse = results[1] as Map<String, dynamic>;
+      List<MotelImageModel> images = [];
+      if (imagesResponse['success'] == true && imagesResponse['data'] != null) {
+        final list = imagesResponse['data'] as List<dynamic>;
+        images = list.map((e) => MotelImageModel.fromJson(e)).toList();
+      }
+
       setState(() {
         _motelDetail = results[0] as BnbMotelsDetailsModel?;
-        _images = results[1] as List<BnbImageModel>;
+        _images = images;
         _amenities = results[2] as List<BnbAmenityModel>;
         _isLoading = false;
         _hasError = false;
@@ -455,6 +462,7 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
                                           context,
                                           BnBHotelImages(
                                             motelid: widget.motel.id,
+                                            initialImages: _images,
                                           ),
                                         );
                                       },
@@ -487,13 +495,13 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
                                           if (index == 4 && _images.length > 5) {
                                             // Last item shows "+X more"
                                             return Showimage.showSmallImage(
-                                              _images[index].imageUrl,
+                                              _images[index].fullImageUrl ?? _images[index].filepath,
                                               context,
                                               widget.motel.name,
                                             );
                                           }
                                           return Showimage.showSmallImage(
-                                            _images[index].imageUrl,
+                                            _images[index].fullImageUrl ?? _images[index].filepath,
                                             context,
                                             widget.motel.name.toString(),
                                           );
@@ -653,22 +661,30 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
                                 ),
                               ),
                             )
-                          : SizedBox(
-                              height: 120,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: _amenities.length > 8
-                                    ? 8
-                                    : _amenities.length,
-                                itemBuilder: (context, index) {
-                                  final amenity = _amenities[index];
-                                  return AmenityCard(
-                                    amenity: amenity,
-                                    onTap: () =>
-                                        _showAmenityDetails(context, amenity),
-                                  );
-                                },
-                              ),
+                          : LayoutBuilder(
+                              builder: (context, constraints) {
+                                final itemCount =
+                                    _amenities.length > 8 ? 8 : _amenities.length;
+
+                                return Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Wrap(
+                                    spacing: 10,
+                                    runSpacing: 10,
+                                    children: List.generate(itemCount, (index) {
+                                      final amenity = _amenities[index];
+                                      return AmenityCard(
+                                        amenity: amenity,
+                                        onTap: () => _showAmenityDetails(
+                                          context,
+                                          amenity,
+                                        ),
+                                        margin: EdgeInsets.zero,
+                                      );
+                                    }),
+                                  ),
+                                );
+                              },
                             ),
                     ],
                   ),

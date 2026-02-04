@@ -7,7 +7,13 @@ import 'package:flutter/material.dart';
 
 class BnBHotelImages extends StatefulWidget {
   final int motelid;
-  const BnBHotelImages({super.key, required this.motelid});
+  final List<MotelImageModel>? initialImages;
+
+  const BnBHotelImages({
+    super.key,
+    required this.motelid,
+    this.initialImages,
+  });
 
   @override
   State<BnBHotelImages> createState() => _BnBHotelImagesState();
@@ -63,6 +69,20 @@ class _BnBHotelImagesState extends State<BnBHotelImages> {
         _images.clear();
         _errorMessage = null;
       });
+    }
+
+    // Use passed-in images from bnbdetails to avoid duplicate page 1 fetch
+    if (widget.initialImages != null &&
+        widget.initialImages!.isNotEmpty &&
+        _images.isEmpty &&
+        !refresh) {
+      setState(() {
+        _images = List.from(widget.initialImages!);
+        _currentPage = 1;
+        _hasMore = _images.length >= 10;
+        _isLoading = false;
+      });
+      return;
     }
 
     setState(() {
