@@ -8,10 +8,12 @@ import 'package:bnbfrontendflutter/bnb/reusablecomponent/layout.dart';
 import 'package:bnbfrontendflutter/models/bnbmodel.dart';
 import 'package:bnbfrontendflutter/models/bnb_motels_details_model.dart';
 import 'package:bnbfrontendflutter/services/favorites_service.dart';
+import 'package:bnbfrontendflutter/services/location_service.dart';
 import 'package:bnbfrontendflutter/services/motel_detail_service.dart';
 import 'package:bnbfrontendflutter/services/share_service.dart';
 import 'package:bnbfrontendflutter/utility/amenities.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
+import 'package:bnbfrontendflutter/utility/distance_calculator.dart';
 import 'package:bnbfrontendflutter/utility/errorcontentretry.dart';
 import 'package:bnbfrontendflutter/utility/images.dart';
 import 'package:bnbfrontendflutter/utility/loading.dart';
@@ -19,6 +21,7 @@ import 'package:bnbfrontendflutter/utility/navigateutility.dart';
 import 'package:bnbfrontendflutter/utility/text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -311,6 +314,52 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
                                   .ellipsis, // Add ellipsis if text too long
                             ),
                           ),
+                                SizedBox(
+                  width: 120, // Fixed width to prevent overflow
+                  child: FutureBuilder<Position?>(
+                    future: LocationService.getCurrentLocation(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Text(
+                          'Calculating...',
+                          style: TextStyle(color: textLight, fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        );
+                      }
+
+                      if (snapshot.hasError ||
+                          !snapshot.hasData ||
+                          snapshot.data == null ||
+                          widget.motel.latitude == null ||
+                          widget.motel.longitude == null) {
+                        return const Text(
+                          'Distance unavailable',
+                          style: TextStyle(color: textLight, fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        );
+                      }
+
+                      final currentPosition = snapshot.data!;
+                      final distance = DistanceCalculator.calculateDistance(
+                        currentPosition.latitude,
+                        currentPosition.longitude,
+                        widget.motel.latitude!,
+                        widget.motel.longitude!,
+                      );
+                      final formattedDistance = DistanceCalculator.formatDistance(distance);
+
+                      return Text(
+                        '$formattedDistance away',
+                        style: const TextStyle(color: textLight, fontSize: 12),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      );
+                    },
+                  ),
+                ),
+          
                         ],
                       ),
                       const SizedBox(height: 12),
@@ -574,7 +623,7 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
                         children: [
                           TextWidgets.iconTextRow(
                             icon: Icons.star_border,
-                            text: "Amenities",
+                            text: "We Offers",
                           ),
                           if (_amenities.isNotEmpty)
                             SmallContainer(

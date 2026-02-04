@@ -231,12 +231,24 @@ class _SplashLoadingPageState extends State<SplashLoadingPage>
           child: FadeTransition(
             opacity: _fadeAnimation,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                             // Animated Logo
                
-                
-                const SizedBox(height: 32),
+                const Expanded(
+                  child: Center(
+                    child: Text(
+                      'Welcome Back',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: textDark,
+                        letterSpacing: 0.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
                 
               
                 _buildLoadingAnimation(),
