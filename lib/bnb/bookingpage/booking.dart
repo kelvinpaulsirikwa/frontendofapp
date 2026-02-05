@@ -6,6 +6,7 @@ import 'package:bnbfrontendflutter/services/booking_service.dart';
 import 'package:bnbfrontendflutter/utility/images.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class BookingPage extends StatefulWidget {
   final Room room;
@@ -21,17 +22,40 @@ class _BookingPageState extends State<BookingPage> {
   final TextEditingController _bookerNumberController = TextEditingController();
   final TextEditingController _mobileNumberController = TextEditingController();
 
-  String _bookingDuration = 'one_day';
+  /// 'today' | 'single_date' | 'date_range' | 'non_consecutive'
+  String _bookingMode = 'today';
   DateTime _checkInDate = DateTime.now();
   DateTime _checkOutDate = DateTime.now().add(const Duration(days: 1));
+  DateTime? _singleDate;
+  final List<DateTime> _selectedDates = [];
   final String _paymentMethod = 'mobile_money';
 
+  DateTime get _today =>
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+  DateTime get _threeMonthsLater => _today.add(const Duration(days: 90));
+
   int get _numberOfNights {
-    return _checkOutDate.difference(_checkInDate).inDays;
+    switch (_bookingMode) {
+      case 'today':
+        return _checkOutDate.difference(_checkInDate).inDays;
+      case 'single_date':
+        return 1;
+      case 'date_range':
+        return _checkOutDate.difference(_checkInDate).inDays;
+      case 'non_consecutive':
+        return _selectedDates.length;
+      default:
+        return 1;
+    }
   }
 
-  double get _totalPrice {
-    return widget.room.pricepernight * _numberOfNights;
+  double get _totalPrice => widget.room.pricepernight * _numberOfNights;
+
+  bool get _canSubmit {
+    if (_bookingMode == 'non_consecutive') {
+      return _selectedDates.isNotEmpty;
+    }
+    return _numberOfNights >= 1;
   }
 
   @override
@@ -41,32 +65,32 @@ class _BookingPageState extends State<BookingPage> {
     super.dispose();
   }
 
+  Widget _datePickerTheme(Widget? child) {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        colorScheme: const ColorScheme.light(
+          primary: earthGreen,
+          onPrimary: softCream,
+          surface: softCream,
+          onSurface: textDark,
+        ),
+        dialogBackgroundColor: softCream,
+      ),
+      child: child ?? const SizedBox.shrink(),
+    );
+  }
+
   Future<void> _selectCheckInDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _checkInDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: earthGreen,
-              onPrimary: softCream,
-              surface: softCream,
-              onSurface: textDark,
-            ),
-            dialogBackgroundColor: softCream,
-          ),
-          child: child!,
-        );
-      },
+      firstDate: _today,
+      lastDate: _threeMonthsLater,
+      builder: (context, child) => _datePickerTheme(child),
     );
-
     if (picked != null) {
       setState(() {
         _checkInDate = picked;
-        // Ensure check-out is always after check-in
         if (_checkOutDate.isBefore(_checkInDate.add(const Duration(days: 1)))) {
           _checkOutDate = _checkInDate.add(const Duration(days: 1));
         }
@@ -79,91 +103,159 @@ class _BookingPageState extends State<BookingPage> {
       context: context,
       initialDate: _checkOutDate,
       firstDate: _checkInDate.add(const Duration(days: 1)),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: earthGreen,
-              onPrimary: softCream,
-              surface: softCream,
-              onSurface: textDark,
-            ),
-            dialogBackgroundColor: softCream,
-          ),
-          child: child!,
-        );
-      },
+      lastDate: _threeMonthsLater,
+      builder: (context, child) => _datePickerTheme(child),
     );
-
     if (picked != null) {
-      setState(() {
-        _checkOutDate = picked;
-      });
+      setState(() => _checkOutDate = picked);
     }
   }
 
+  Future<void> _selectSingleDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _singleDate ?? _today,
+      firstDate: _today,
+      lastDate: _threeMonthsLater,
+      builder: (context, child) => _datePickerTheme(child),
+    );
+    if (picked != null) {
+      setState(() => _singleDate = picked);
+    }
+  }
+
+  Future<void> _showNonConsecutiveCalendar(BuildContext context) async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _NonConsecutiveCalendarSheet(
+        selectedDates: List.from(_selectedDates),
+        today: _today,
+        lastDate: _threeMonthsLater,
+        onDone: (dates) {
+          setState(() {
+            _selectedDates.clear();
+            _selectedDates.addAll(dates);
+            _selectedDates.sort((a, b) => a.compareTo(b));
+          });
+        },
+      ),
+    );
+  }
+
+  void _removeNonConsecutiveDate(DateTime d) {
+    setState(() {
+      _selectedDates.removeWhere((x) =>
+          x.year == d.year && x.month == d.month && x.day == d.day);
+    });
+  }
+
+  String _fmt(DateTime d) => d.toIso8601String().split('T')[0];
+
   Future<void> _submitBooking() async {
-    if (_formKey.currentState!.validate()) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => Center(
-          child: Container(
-            margin: const EdgeInsets.all(40),
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: softCream,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(color: earthGreen),
-                SizedBox(height: 20),
-                Text(
-                  'Processing your booking...',
-                  style: TextStyle(
-                    color: textDark,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+    if (!_formKey.currentState!.validate()) return;
+    if (!_canSubmit) {
+      _showErrorDialog('Please select at least one date.');
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => Center(
+        child: Container(
+          margin: const EdgeInsets.all(40),
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: softCream,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(color: earthGreen),
+              SizedBox(height: 20),
+              Text(
+                'Processing your booking...',
+                style: TextStyle(
+                  color: textDark,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-      );
+      ),
+    );
 
-      try {
-        final response = await BookingService.createBookingAndProcessPayment(
+    try {
+      Map<String, dynamic> response;
+      if (_bookingMode == 'non_consecutive') {
+        final dates = List<DateTime>.from(_selectedDates);
+        response = {'success': true, 'message': 'Bookings created successfully'};
+        for (int i = 0; i < dates.length; i++) {
+          final checkIn = dates[i];
+          final checkOut = checkIn.add(const Duration(days: 1));
+          final r = await BookingService.createBookingAndProcessPayment(
+            roomId: widget.room.id,
+            customerId: 1,
+            checkInDate: _fmt(checkIn),
+            checkOutDate: _fmt(checkOut),
+            contactNumber: _bookerNumberController.text,
+            paymentMethod: _paymentMethod,
+            paymentReference: _mobileNumberController.text,
+            specialRequests: null,
+          );
+          if (r['success'] != true) {
+            response = r;
+            response['message'] = 'Failed on date ${_fmt(checkIn)}: ${r['message'] ?? 'Unknown error'}';
+            break;
+          }
+          response = r;
+        }
+      } else {
+        final checkIn = _bookingMode == 'single_date'
+            ? _singleDate!
+            : _bookingMode == 'today'
+                ? _today
+                : _checkInDate;
+        final checkOut = _bookingMode == 'single_date'
+            ? _singleDate!.add(const Duration(days: 1))
+            : _bookingMode == 'today'
+                ? _checkOutDate
+                : _checkOutDate;
+        response = await BookingService.createBookingAndProcessPayment(
           roomId: widget.room.id,
-          customerId: 1, // TODO: Get from user auth
-          checkInDate: _checkInDate.toIso8601String().split('T')[0],
-          checkOutDate: _checkOutDate.toIso8601String().split('T')[0],
+          customerId: 1,
+          checkInDate: _fmt(checkIn),
+          checkOutDate: _fmt(checkOut),
           contactNumber: _bookerNumberController.text,
           paymentMethod: _paymentMethod,
           paymentReference: _mobileNumberController.text,
           specialRequests: null,
         );
+      }
 
-        Navigator.of(context).pop();
+      if (!mounted) return;
+      Navigator.of(context).pop();
 
-        // Check if response has errors (validation errors)
-        if (response['success'] == false) {
-          final errors = response['errors'];
-          if (errors != null && errors is Map) {
-            _showValidationErrorsDialog(
-              Map<String, dynamic>.from(errors),
-              response['message'] ?? 'Validation failed',
-            );
-          } else {
-            _showBookingResultDialog(response);
-          }
+      if (response['success'] == false) {
+        final errors = response['errors'];
+        if (errors != null && errors is Map) {
+          _showValidationErrorsDialog(
+            Map<String, dynamic>.from(errors),
+            response['message'] ?? 'Validation failed',
+          );
         } else {
           _showBookingResultDialog(response);
         }
-      } catch (e) {
+      } else {
+        _showBookingResultDialog(response);
+      }
+    } catch (e) {
+      if (mounted) {
         Navigator.of(context).pop();
         _showErrorDialog('Failed to process booking: $e');
       }
@@ -517,7 +609,7 @@ class _BookingPageState extends State<BookingPage> {
             const Expanded(
               child: Text(
                 'Validation Error',
-                style: TextStyle(
+                style: TextStyle( 
                   color: textDark,
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -624,39 +716,58 @@ class _BookingPageState extends State<BookingPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Duration Selection - HORIZONTAL
+                          // Booking Mode Selection
                           _buildSection(
-                            title: 'Stay Duration',
-                            child: Row(
+                            title: 'How would you like to book?',
+                            child: Column(
                               children: [
-                                Expanded(
-                                  child: _buildDurationOption(
-                                    value: 'one_day',
-                                    title: 'One Night',
-                                    icon: Icons.nightlight_round,
-                                  ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildModeChip(
+                                        'today',
+                                        'Today',
+                                        Icons.today,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: _buildModeChip(
+                                        'single_date',
+                                        'Single Date',
+                                        Icons.calendar_today,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _buildDurationOption(
-                                    value: 'multiple_days',
-                                    title: 'Many Nights',
-                                    icon: Icons.calendar_month,
-                                  ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildModeChip(
+                                        'date_range',
+                                        'Date Range',
+                                        Icons.date_range,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: _buildModeChip(
+                                        'non_consecutive',
+                                        'Skip Dates',
+                                        Icons.event_available,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
                           ),
                           const SizedBox(height: 20),
 
-                          // Dates Selection
-                          if (_bookingDuration == 'multiple_days') ...[
-                            _buildSection(
-                              title: 'Select Dates',
-                              child: _buildDateSelection(),
-                            ),
-                            const SizedBox(height: 20),
-                          ],
+                          // Date selection per mode
+                          _buildDateSelectionForMode(),
+                          const SizedBox(height: 20),
 
                           // Contact Number
                           _buildSection(
@@ -835,24 +946,28 @@ class _BookingPageState extends State<BookingPage> {
     );
   }
 
-  Widget _buildDurationOption({
-    required String value,
-    required String title,
-    required IconData icon,
-  }) {
-    final isSelected = _bookingDuration == value;
+  Widget _buildModeChip(String value, String title, IconData icon) {
+    final isSelected = _bookingMode == value;
     return InkWell(
       onTap: () {
         setState(() {
-          _bookingDuration = value;
-          if (value == 'one_day') {
-            _checkOutDate = _checkInDate.add(const Duration(days: 1));
+          _bookingMode = value;
+          if (value == 'today') {
+            _checkInDate = _today;
+            _checkOutDate = _today.add(const Duration(days: 1));
+          } else if (value == 'single_date') {
+            _singleDate ??= _today;
+          } else if (value == 'date_range') {
+            _checkInDate = _today;
+            _checkOutDate = _today.add(const Duration(days: 1));
+          } else if (value == 'non_consecutive') {
+            _selectedDates.clear();
           }
         });
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         decoration: BoxDecoration(
           color: isSelected ? earthGreen : softCream,
           borderRadius: BorderRadius.circular(12),
@@ -864,15 +979,257 @@ class _BookingPageState extends State<BookingPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Icon(icon, size: 22, color: isSelected ? softCream : textDark),
+            const SizedBox(height: 4),
             Text(
               title,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: isSelected ? softCream : textDark,
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateSelectionForMode() {
+    switch (_bookingMode) {
+      case 'today':
+        return _buildTodaySelection();
+      case 'single_date':
+        return _buildSingleDateSelection();
+      case 'date_range':
+        return _buildDateRangeSelection();
+      case 'non_consecutive':
+        return _buildNonConsecutiveSelection();
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  Widget _buildTodaySelection() {
+    return _buildSection(
+      title: 'Book from today',
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: softCream,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: earthGreen.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.today, size: 20, color: earthGreen),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Check-in',
+                          style: TextStyle(color: textLight, fontSize: 12),
+                        ),
+                        Text(
+                          'Today',
+                          style: TextStyle(
+                            color: textDark,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: () => _selectCheckOutDate(context),
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: earthGreen.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.event, size: 20, color: earthGreen),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Until date',
+                            style: TextStyle(color: textLight, fontSize: 12),
+                          ),
+                          Text(
+                            '${_checkOutDate.day}/${_checkOutDate.month}/${_checkOutDate.year}',
+                            style: const TextStyle(
+                              color: textDark,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.arrow_forward_ios, size: 16, color: textLight),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: earthGreen.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Nights',
+                    style: TextStyle(
+                      color: textDark,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    '$_numberOfNights night${_numberOfNights > 1 ? 's' : ''}',
+                    style: const TextStyle(
+                      color: earthGreen,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSingleDateSelection() {
+    final d = _singleDate ?? _today;
+    return _buildSection(
+      title: 'Select one night (within 3 months)',
+      child: InkWell(
+        onTap: () => _selectSingleDate(context),
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: softCream,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: lightGrey),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.calendar_today, size: 24, color: earthGreen),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Selected date',
+                      style: TextStyle(color: textLight, fontSize: 12),
+                    ),
+                    Text(
+                      '${d.day}/${d.month}/${d.year}',
+                      style: const TextStyle(
+                        color: textDark,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios, size: 16, color: textLight),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateRangeSelection() {
+    return _buildSection(
+      title: 'Select date range',
+      child: _buildDateSelection(),
+    );
+  }
+
+  Widget _buildNonConsecutiveSelection() {
+    return _buildSection(
+      title: 'Select individual dates (tap to add)',
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: softCream,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: lightGrey),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            OutlinedButton.icon(
+              onPressed: () => _showNonConsecutiveCalendar(context),
+              icon: const Icon(Icons.add, size: 20),
+              label: const Text('Add date'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: earthGreen,
+                side: const BorderSide(color: earthGreen),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            if (_selectedDates.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _selectedDates.map((d) {
+                  return Chip(
+                    label: Text(
+                      '${d.day}/${d.month}/${d.year}',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    deleteIcon: const Icon(Icons.close, size: 16),
+                    onDeleted: () => _removeNonConsecutiveDate(d),
+                    backgroundColor: earthGreen.withOpacity(0.1),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '${_selectedDates.length} night${_selectedDates.length > 1 ? 's' : ''} selected',
+                style: TextStyle(
+                  color: textLight,
+                  fontSize: 12,
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -1153,7 +1510,7 @@ class _BookingPageState extends State<BookingPage> {
               width: 160,
               height: 56,
               child: ElevatedButton(
-                onPressed: _submitBooking,
+                onPressed: _canSubmit ? _submitBooking : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: earthGreen,
                   foregroundColor: softCream,
@@ -1170,6 +1527,208 @@ class _BookingPageState extends State<BookingPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _NonConsecutiveCalendarSheet extends StatefulWidget {
+  final List<DateTime> selectedDates;
+  final DateTime today;
+  final DateTime lastDate;
+  final void Function(List<DateTime>) onDone;
+
+  const _NonConsecutiveCalendarSheet({
+    required this.selectedDates,
+    required this.today,
+    required this.lastDate,
+    required this.onDone,
+  });
+
+  @override
+  State<_NonConsecutiveCalendarSheet> createState() =>
+      _NonConsecutiveCalendarSheetState();
+}
+
+class _NonConsecutiveCalendarSheetState
+    extends State<_NonConsecutiveCalendarSheet> {
+  late List<DateTime> _selected;
+  late DateTime _focusedMonth;
+
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  DateTime _normalize(DateTime d) =>
+      DateTime(d.year, d.month, d.day);
+
+  bool _isSelected(DateTime day) =>
+      _selected.any((d) => _isSameDay(d, day));
+
+  bool _isSelectable(DateTime day) {
+    final n = _normalize(day);
+    return !n.isBefore(widget.today) && !n.isAfter(widget.lastDate);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = List.from(widget.selectedDates);
+    _focusedMonth = _selected.isNotEmpty
+        ? DateTime(_selected.first.year, _selected.first.month)
+        : DateTime(widget.today.year, widget.today.month);
+  }
+
+  void _toggleDate(DateTime selectedDay, DateTime focusedDay) {
+    final n = _normalize(selectedDay);
+    if (!_isSelectable(selectedDay)) return;
+    setState(() {
+      if (_isSelected(n)) {
+        _selected.removeWhere((d) => _isSameDay(d, n));
+      } else {
+        _selected.add(n);
+        _selected.sort((a, b) => a.compareTo(b));
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.7,
+      decoration: const BoxDecoration(
+        color: softCream,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: richBrown.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Select dates',
+                  style: TextStyle(
+                    color: textDark,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  '${_selected.length} selected',
+                  style: TextStyle(
+                    color: earthGreen,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: TableCalendar(
+                firstDay: widget.today,
+                lastDay: widget.lastDate,
+                focusedDay: _focusedMonth,
+                selectedDayPredicate: (day) => _isSelected(day),
+                onDaySelected: _toggleDate,
+                onPageChanged: (focused) =>
+                    setState(() => _focusedMonth = focused),
+                headerStyle: const HeaderStyle(
+                  formatButtonVisible: false,
+                  titleCentered: true,
+                  leftChevronIcon: Icon(Icons.chevron_left, color: textDark),
+                  rightChevronIcon: Icon(Icons.chevron_right, color: textDark),
+                  titleTextStyle: TextStyle(
+                    color: textDark,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                calendarStyle: CalendarStyle(
+                  selectedDecoration: BoxDecoration(
+                    color: earthGreen,
+                    shape: BoxShape.circle,
+                  ),
+                  todayDecoration: BoxDecoration(
+                    color: earthGreen.withOpacity(0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  todayTextStyle: const TextStyle(
+                    color: textDark,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  selectedTextStyle: const TextStyle(
+                    color: softCream,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  outsideTextStyle: TextStyle(
+                    color: textLight.withOpacity(0.5),
+                  ),
+                  defaultTextStyle: const TextStyle(color: textDark),
+                  weekendTextStyle: const TextStyle(color: textDark),
+                  disabledTextStyle: TextStyle(
+                    color: textLight.withOpacity(0.5),
+                  ),
+                ),
+                calendarBuilders: CalendarBuilders(
+                  markerBuilder: (context, date, events) {
+                    if (!_isSelected(date)) return null;
+                    return Positioned(
+                      bottom: 2,
+                      child: Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: earthGreen,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () {
+                  widget.onDone(_selected);
+                  Navigator.of(context).pop();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: earthGreen,
+                  foregroundColor: softCream,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'Done',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
