@@ -22,11 +22,10 @@ class _BookingPageState extends State<BookingPage> {
   final TextEditingController _bookerNumberController = TextEditingController();
   final TextEditingController _mobileNumberController = TextEditingController();
 
-  /// 'today' | 'single_date' | 'date_range' | 'non_consecutive'
+  /// 'today' | 'pick_dates'
   String _bookingMode = 'today';
   DateTime _checkInDate = DateTime.now();
   DateTime _checkOutDate = DateTime.now().add(const Duration(days: 1));
-  DateTime? _singleDate;
   final List<DateTime> _selectedDates = [];
   final String _paymentMethod = 'mobile_money';
 
@@ -38,11 +37,7 @@ class _BookingPageState extends State<BookingPage> {
     switch (_bookingMode) {
       case 'today':
         return _checkOutDate.difference(_checkInDate).inDays;
-      case 'single_date':
-        return 1;
-      case 'date_range':
-        return _checkOutDate.difference(_checkInDate).inDays;
-      case 'non_consecutive':
+      case 'pick_dates':
         return _selectedDates.length;
       default:
         return 1;
@@ -52,7 +47,7 @@ class _BookingPageState extends State<BookingPage> {
   double get _totalPrice => widget.room.pricepernight * _numberOfNights;
 
   bool get _canSubmit {
-    if (_bookingMode == 'non_consecutive') {
+    if (_bookingMode == 'pick_dates') {
       return _selectedDates.isNotEmpty;
     }
     return _numberOfNights >= 1;
@@ -80,24 +75,6 @@ class _BookingPageState extends State<BookingPage> {
     );
   }
 
-  Future<void> _selectCheckInDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _checkInDate,
-      firstDate: _today,
-      lastDate: _threeMonthsLater,
-      builder: (context, child) => _datePickerTheme(child),
-    );
-    if (picked != null) {
-      setState(() {
-        _checkInDate = picked;
-        if (_checkOutDate.isBefore(_checkInDate.add(const Duration(days: 1)))) {
-          _checkOutDate = _checkInDate.add(const Duration(days: 1));
-        }
-      });
-    }
-  }
-
   Future<void> _selectCheckOutDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -111,20 +88,7 @@ class _BookingPageState extends State<BookingPage> {
     }
   }
 
-  Future<void> _selectSingleDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _singleDate ?? _today,
-      firstDate: _today,
-      lastDate: _threeMonthsLater,
-      builder: (context, child) => _datePickerTheme(child),
-    );
-    if (picked != null) {
-      setState(() => _singleDate = picked);
-    }
-  }
-
-  Future<void> _showNonConsecutiveCalendar(BuildContext context) async {
+  Future<void> _showPickDatesCalendar(BuildContext context) async {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -144,7 +108,7 @@ class _BookingPageState extends State<BookingPage> {
     );
   }
 
-  void _removeNonConsecutiveDate(DateTime d) {
+  void _removePickDatesDate(DateTime d) {
     setState(() {
       _selectedDates.removeWhere((x) =>
           x.year == d.year && x.month == d.month && x.day == d.day);
@@ -192,7 +156,7 @@ class _BookingPageState extends State<BookingPage> {
 
     try {
       Map<String, dynamic> response;
-      if (_bookingMode == 'non_consecutive') {
+      if (_bookingMode == 'pick_dates') {
         final dates = List<DateTime>.from(_selectedDates);
         response = {'success': true, 'message': 'Bookings created successfully'};
         for (int i = 0; i < dates.length; i++) {
@@ -216,16 +180,8 @@ class _BookingPageState extends State<BookingPage> {
           response = r;
         }
       } else {
-        final checkIn = _bookingMode == 'single_date'
-            ? _singleDate!
-            : _bookingMode == 'today'
-                ? _today
-                : _checkInDate;
-        final checkOut = _bookingMode == 'single_date'
-            ? _singleDate!.add(const Duration(days: 1))
-            : _bookingMode == 'today'
-                ? _checkOutDate
-                : _checkOutDate;
+        final checkIn = _today;
+        final checkOut = _checkOutDate;
         response = await BookingService.createBookingAndProcessPayment(
           roomId: widget.room.id,
           customerId: 1,
@@ -719,46 +675,22 @@ class _BookingPageState extends State<BookingPage> {
                           // Booking Mode Selection
                           _buildSection(
                             title: 'How would you like to book?',
-                            child: Column(
+                            child: Row(
                               children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _buildModeChip(
-                                        'today',
-                                        'Today',
-                                        Icons.today,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: _buildModeChip(
-                                        'single_date',
-                                        'Single Date',
-                                        Icons.calendar_today,
-                                      ),
-                                    ),
-                                  ],
+                                Expanded(
+                                  child: _buildModeChip(
+                                    'today',
+                                    'Today',
+                                    Icons.today,
+                                  ),
                                 ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _buildModeChip(
-                                        'date_range',
-                                        'Date Range',
-                                        Icons.date_range,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: _buildModeChip(
-                                        'non_consecutive',
-                                        'Skip Dates',
-                                        Icons.event_available,
-                                      ),
-                                    ),
-                                  ],
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _buildModeChip(
+                                    'pick_dates',
+                                    'Pick Dates',
+                                    Icons.calendar_month,
+                                  ),
                                 ),
                               ],
                             ),
@@ -955,12 +887,7 @@ class _BookingPageState extends State<BookingPage> {
           if (value == 'today') {
             _checkInDate = _today;
             _checkOutDate = _today.add(const Duration(days: 1));
-          } else if (value == 'single_date') {
-            _singleDate ??= _today;
-          } else if (value == 'date_range') {
-            _checkInDate = _today;
-            _checkOutDate = _today.add(const Duration(days: 1));
-          } else if (value == 'non_consecutive') {
+          } else if (value == 'pick_dates') {
             _selectedDates.clear();
           }
         });
@@ -1000,12 +927,8 @@ class _BookingPageState extends State<BookingPage> {
     switch (_bookingMode) {
       case 'today':
         return _buildTodaySelection();
-      case 'single_date':
-        return _buildSingleDateSelection();
-      case 'date_range':
-        return _buildDateRangeSelection();
-      case 'non_consecutive':
-        return _buildNonConsecutiveSelection();
+      case 'pick_dates':
+        return _buildPickDatesSelection();
       default:
         return const SizedBox.shrink();
     }
@@ -1127,61 +1050,9 @@ class _BookingPageState extends State<BookingPage> {
     );
   }
 
-  Widget _buildSingleDateSelection() {
-    final d = _singleDate ?? _today;
+  Widget _buildPickDatesSelection() {
     return _buildSection(
-      title: 'Select one night (within 3 months)',
-      child: InkWell(
-        onTap: () => _selectSingleDate(context),
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: softCream,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: lightGrey),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.calendar_today, size: 24, color: earthGreen),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Selected date',
-                      style: TextStyle(color: textLight, fontSize: 12),
-                    ),
-                    Text(
-                      '${d.day}/${d.month}/${d.year}',
-                      style: const TextStyle(
-                        color: textDark,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.arrow_forward_ios, size: 16, color: textLight),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDateRangeSelection() {
-    return _buildSection(
-      title: 'Select date range',
-      child: _buildDateSelection(),
-    );
-  }
-
-  Widget _buildNonConsecutiveSelection() {
-    return _buildSection(
-      title: 'Select individual dates (tap to add)',
+      title: 'Select dates (single, range, or skip dates)',
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -1193,7 +1064,7 @@ class _BookingPageState extends State<BookingPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             OutlinedButton.icon(
-              onPressed: () => _showNonConsecutiveCalendar(context),
+              onPressed: () => _showPickDatesCalendar(context),
               icon: const Icon(Icons.add, size: 20),
               label: const Text('Add date'),
               style: OutlinedButton.styleFrom(
@@ -1216,7 +1087,7 @@ class _BookingPageState extends State<BookingPage> {
                       style: const TextStyle(fontSize: 12),
                     ),
                     deleteIcon: const Icon(Icons.close, size: 16),
-                    onDeleted: () => _removeNonConsecutiveDate(d),
+                    onDeleted: () => _removePickDatesDate(d),
                     backgroundColor: earthGreen.withOpacity(0.1),
                   );
                 }).toList(),
@@ -1232,145 +1103,6 @@ class _BookingPageState extends State<BookingPage> {
             ],
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildDateSelection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: softCream,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          // Check-in Date Picker
-          InkWell(
-            onTap: () => _selectCheckInDate(context),
-            borderRadius: BorderRadius.circular(10),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: lightGrey,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.calendar_today, size: 20, color: textLight),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Check-in Date',
-                          style: TextStyle(color: textLight, fontSize: 12),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${_checkInDate.day}/${_checkInDate.month}/${_checkInDate.year}',
-                          style: const TextStyle(
-                            color: textDark,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: textLight,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Check-out Date Picker
-          InkWell(
-            onTap: () => _selectCheckOutDate(context),
-            borderRadius: BorderRadius.circular(10),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: lightGrey,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.logout, size: 20, color: earthGreen),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Check-out Date',
-                          style: TextStyle(color: textLight, fontSize: 12),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${_checkOutDate.day}/${_checkOutDate.month}/${_checkOutDate.year}',
-                          style: const TextStyle(
-                            color: earthGreen,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: textLight,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Nights Display
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: earthGreen.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.nights_stay, size: 20, color: earthGreen),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Number of Nights',
-                      style: TextStyle(
-                        color: textDark,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                Text(
-                  '$_numberOfNights night${_numberOfNights > 1 ? 's' : ''}',
-                  style: const TextStyle(
-                    color: earthGreen,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -1569,13 +1301,27 @@ class _NonConsecutiveCalendarSheetState
     return !n.isBefore(widget.today) && !n.isAfter(widget.lastDate);
   }
 
+  DateTime _clampFocusedDay(DateTime value) {
+    final first = DateTime(widget.today.year, widget.today.month, widget.today.day);
+    final last = DateTime(widget.lastDate.year, widget.lastDate.month, widget.lastDate.day);
+    if (value.isBefore(first)) return first;
+    if (value.isAfter(last)) return last;
+    return value;
+  }
+
   @override
   void initState() {
     super.initState();
     _selected = List.from(widget.selectedDates);
+    // Remove dates outside [today, lastDate] to avoid stale/past selections
+    final todayNorm = _normalize(widget.today);
+    final lastNorm = _normalize(widget.lastDate);
+    _selected.removeWhere((d) => d.isBefore(todayNorm) || d.isAfter(lastNorm));
+    _selected.sort((a, b) => a.compareTo(b));
+    // focusedDay must be >= firstDay per TableCalendar assertion
     _focusedMonth = _selected.isNotEmpty
-        ? DateTime(_selected.first.year, _selected.first.month)
-        : DateTime(widget.today.year, widget.today.month);
+        ? _clampFocusedDay(DateTime(_selected.first.year, _selected.first.month, _selected.first.day))
+        : DateTime(widget.today.year, widget.today.month, widget.today.day);
   }
 
   void _toggleDate(DateTime selectedDay, DateTime focusedDay) {
@@ -1643,7 +1389,7 @@ class _NonConsecutiveCalendarSheetState
                 selectedDayPredicate: (day) => _isSelected(day),
                 onDaySelected: _toggleDate,
                 onPageChanged: (focused) =>
-                    setState(() => _focusedMonth = focused),
+                    setState(() => _focusedMonth = _clampFocusedDay(focused)),
                 headerStyle: const HeaderStyle(
                   formatButtonVisible: false,
                   titleCentered: true,
