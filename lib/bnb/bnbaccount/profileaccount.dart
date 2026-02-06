@@ -1,6 +1,7 @@
 import 'package:bnbfrontendflutter/bnb/bnbaccount/aboutbnb.dart';
 import 'package:bnbfrontendflutter/bnb/bnbaccount/currentstays.dart';
 import 'package:bnbfrontendflutter/bnb/bnbaccount/paststays.dart';
+import 'package:bnbfrontendflutter/bnb/bnbaccount/tac.dart';
 import 'package:bnbfrontendflutter/bnb/bnbaccount/transcation.dart';
 import 'package:bnbfrontendflutter/bnb/bnbaccount/ui.dart';
 import 'package:bnbfrontendflutter/bnb/bnbaccount/upcomingbooking.dart';
@@ -149,7 +150,7 @@ class _ProfileAccountState extends State<ProfileAccount> {
                       subtitle: local.currentStaysSubtitle,
                       color: earthGreen,
                       onTap: () {
-                        NavigationUtil.pushwithslideTo(context, CurrentStays());
+                        NavigationUtil.pushwithslideTo(context, const CurrentStays());
                       },
                     ),
                     const SizedBox(height: 10),
@@ -161,7 +162,7 @@ class _ProfileAccountState extends State<ProfileAccount> {
                       onTap: () {
                         NavigationUtil.pushwithslideTo(
                           context,
-                          UpcomingBooking(),
+                          const UpcomingBooking(),
                         );
                       },
                     ),
@@ -172,7 +173,7 @@ class _ProfileAccountState extends State<ProfileAccount> {
                       subtitle: local.pastStaysSubtitle,
                       color: deepTerracotta,
                       onTap: () {
-                        NavigationUtil.pushwithslideTo(context, PastStays());
+                        NavigationUtil.pushwithslideTo(context, const PastStays());
                       },
                     ),
                     const SizedBox(height: 10),
@@ -184,7 +185,7 @@ class _ProfileAccountState extends State<ProfileAccount> {
                       onTap: () {
                         NavigationUtil.pushwithslideTo(
                           context,
-                          TranscationDetails(),
+                          const TranscationDetails(),
                         );
                       },
                     ),
@@ -250,7 +251,7 @@ class _ProfileAccountState extends State<ProfileAccount> {
                       subtitle: local.aboutBnBSubtitle,
                       color: sunsetOrange,
                       onTap: () {
-                        NavigationUtil.pushwithslideTo(context, AboutBnB());
+                        NavigationUtil.pushwithslideTo(context, const AboutBnB());
                       },
                     ),
                     const SizedBox(height: 10),
@@ -260,7 +261,9 @@ class _ProfileAccountState extends State<ProfileAccount> {
                       title: local.termsOfService,
                       subtitle: local.termsOfServiceSubtitle,
                       color: sunsetOrange,
-                      onTap: () {},
+                      onTap: () {
+                        NavigationUtil.pushwithslideTo(context, const TermsAndCondition());
+                      },
                     ),
                   ],
                 ),
