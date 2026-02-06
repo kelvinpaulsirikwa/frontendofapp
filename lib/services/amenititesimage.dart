@@ -51,8 +51,6 @@ class AmenitiesImagesService {
     int limit = 10,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching amenities images for: $bnbamenitiesid');
-
     final queryParams = {
       'page': page.toString(),
       'limit': limit.toString(),
@@ -64,7 +62,6 @@ class AmenitiesImagesService {
       queryParams: queryParams,
     );
 
-    debugPrint('Amenities Images Response: $response');
     return response;
   }
 }

@@ -158,14 +158,10 @@ class Showimage {
       );
     }
 
-    print('🖼️ Loading image: $resolvedUrl');
-
     return Image.network(
       resolvedUrl,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
-        print('❌ Image load failed for: $resolvedUrl');
-        print('❌ Error: $error');
         return Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(

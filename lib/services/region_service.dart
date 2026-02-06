@@ -33,8 +33,6 @@ class RegionService {
     int? countryId,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching regions');
-
     Map<String, String> queryParams = {};
 
     if (search != null && search.isNotEmpty) {
@@ -49,8 +47,6 @@ class RegionService {
       context: context,
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-
-    debugPrint('Regions Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       List<dynamic> regionsJson = response['data'];

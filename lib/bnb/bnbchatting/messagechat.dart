@@ -109,7 +109,6 @@ class _MessageChatState extends State<MessageChat> {
         setState(() {
           _isLoadingMore = false;
         });
-        debugPrint('Error loading more messages: $e');
       }
     }
   }
@@ -171,7 +170,7 @@ class _MessageChatState extends State<MessageChat> {
         }
       }
     } catch (e) {
-      debugPrint('Error polling messages: $e');
+      // Error polling messages
     } finally {
       _isRefreshing = false;
     }

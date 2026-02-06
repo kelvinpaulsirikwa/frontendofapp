@@ -10,8 +10,6 @@ class NearMeService {
     int limit = 10,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching near me motels');
-
     final queryParams = {
       'latitude': latitude.toString(),
       'longitude': longitude.toString(),
@@ -25,8 +23,6 @@ class NearMeService {
       context: context,
       queryParams: queryParams,
     );
-
-    debugPrint('Near Me Motels Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       return response;
@@ -45,8 +41,6 @@ class NearMeService {
     int limit = 10,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching top searched motels');
-
     final queryParams = {
       'page': page.toString(),
       'limit': limit.toString(),
@@ -57,8 +51,6 @@ class NearMeService {
       context: context,
       queryParams: queryParams,
     );
-
-    debugPrint('Top Searched Motels Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       return response;
@@ -77,7 +69,6 @@ class NearMeService {
     int limit = 10,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching newest motels');
 
     final queryParams = {
       'page': page.toString(),
@@ -89,8 +80,6 @@ class NearMeService {
       context: context,
       queryParams: queryParams,
     );
-
-    debugPrint('Newest Motels Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       return response;

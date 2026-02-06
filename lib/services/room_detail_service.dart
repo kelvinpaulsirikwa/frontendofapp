@@ -10,8 +10,6 @@ class RoomDetailService {
     int limit = 5,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching room images for: $roomId');
-
     final queryParams = {
       'page': page.toString(),
       'limit': limit.toString(),
@@ -22,8 +20,6 @@ class RoomDetailService {
       context: context,
       queryParams: queryParams,
     );
-
-    debugPrint('Room Images Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       List<dynamic> imagesJson = response['data'];
@@ -48,8 +44,6 @@ class RoomDetailService {
     int limit = 10,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching paging room images for: $roomId');
-
     final queryParams = {
       'page': page.toString(),
       'limit': limit.toString(),
@@ -61,7 +55,6 @@ class RoomDetailService {
       queryParams: queryParams,
     );
 
-    debugPrint('Room Images Paging Response: $response');
     return response;
   }
 
@@ -71,8 +64,6 @@ class RoomDetailService {
     int limit = 10,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching room items for: $roomId');
-
     final queryParams = {
       'page': page.toString(),
       'limit': limit.toString(),
@@ -83,8 +74,6 @@ class RoomDetailService {
       context: context,
       queryParams: queryParams,
     );
-
-    debugPrint('Room Items Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       List<dynamic> itemsJson = response['data'];

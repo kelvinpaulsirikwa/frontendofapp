@@ -58,7 +58,6 @@ class _NewRestMotelState extends State<NewRestMotel> {
 
       if (response['success'] == true) {
         final List<dynamic> newMotels = response['data'];
-        print('New motels: $newMotels');
         final pagination = response['pagination'];
 
         setState(() {
@@ -75,15 +74,12 @@ class _NewRestMotelState extends State<NewRestMotel> {
         // Notify parent about updated motels AFTER state update
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (widget.onMotelsUpdated != null && mounted) {
-            print(
-              '📍 NewRestMotel: Notifying parent with ${_newestMotels.length} motels',
-            );
             widget.onMotelsUpdated!(_newestMotels);
           }
         });
       }
     } catch (e) {
-      print('Error loading newest motels: $e');
+      // Error loading newest motels
     } finally {
       setState(() {
         _isLoading = false;

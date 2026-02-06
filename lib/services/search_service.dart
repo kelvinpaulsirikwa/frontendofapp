@@ -1,19 +1,14 @@
 import 'package:bnbfrontendflutter/services/api_client.dart';
 import 'package:bnbfrontendflutter/services/bnbconnection.dart';
-import 'package:flutter/material.dart';
 
 class SearchService {
   static Future<List<dynamic>> getRegions({
     BuildContext? context,
   }) async {
-    debugPrint('Fetching search regions');
-
     final response = await ApiClient.get(
       '/search/regions',
       context: context,
     );
-
-    debugPrint('Search Regions Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       return response['data'];
@@ -25,14 +20,10 @@ class SearchService {
   static Future<List<dynamic>> getAmenities({
     BuildContext? context,
   }) async {
-    debugPrint('Fetching search amenities');
-
     final response = await ApiClient.get(
       '/search/amenities',
       context: context,
     );
-
-    debugPrint('Search Amenities Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       return response['data'];
@@ -50,8 +41,6 @@ class SearchService {
     int limit = 10,
     BuildContext? context,
   }) async {
-    debugPrint('Searching motels');
-
     // Build query parameters
     Map<String, String> queryParams = {
       'page': page.toString(),
@@ -76,9 +65,6 @@ class SearchService {
       context: context,
       queryParams: queryParams,
     );
-
-    debugPrint('===== /search/motels API Response =====');
-    debugPrint('$response');
 
     if (response['success'] == true && response['data'] != null) {
       // Construct full image URLs for each motel
@@ -112,8 +98,6 @@ class SearchService {
     int limit = 5,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching motel images for: $motelId');
-
     final queryParams = {
       'page': page.toString(),
       'limit': limit.toString(),
@@ -124,8 +108,6 @@ class SearchService {
       context: context,
       queryParams: queryParams,
     );
-
-    debugPrint('Motel Images Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       return response['data'];
@@ -139,15 +121,12 @@ class SearchService {
     BuildContext? context,
   }) async {
     final body = {'motel_ids': motelIds};
-    debugPrint('Track Search Request Body: $body');
 
     final response = await ApiClient.post(
       '/search/track',
       context: context,
       body: body,
     );
-
-    debugPrint('Track Search Response: $response');
 
     return response['success'] == true;
   }

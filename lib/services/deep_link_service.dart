@@ -24,7 +24,7 @@ class DeepLinkService {
           _handleDeepLink(context, initialUri);
         }
       } catch (e) {
-        print('Error getting initial URI: $e');
+        // Error getting initial URI
       }
     }
 
@@ -37,7 +37,7 @@ class DeepLinkService {
         }
       },
       onError: (err) {
-        print('Deep link error: $err');
+        // Deep link error
       },
     );
   }
@@ -45,8 +45,6 @@ class DeepLinkService {
   /// Handle deep link and navigate to appropriate screen
   static Future<void> _handleDeepLink(BuildContext context, Uri uri) async {
     try {
-      print('🔗 Handling deep link: $uri');
-
       final pathSegments = uri.pathSegments;
       
       if (pathSegments.isEmpty) {
@@ -75,7 +73,7 @@ class DeepLinkService {
         return;
       }
     } catch (e) {
-      print('Error handling deep link: $e');
+      // Error handling deep link
     }
   }
 
@@ -106,7 +104,6 @@ class DeepLinkService {
         NavigationUtil.pushTo(context, BnBDetails(motel: simpleMotel));
       }
     } catch (e) {
-      print('Error navigating to property: $e');
       // Show error message to user
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -147,7 +144,6 @@ class DeepLinkService {
         );
       }
     } catch (e) {
-      print('Error navigating to room: $e');
       // Show error message to user
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

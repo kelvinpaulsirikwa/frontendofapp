@@ -83,13 +83,7 @@ class _BnBRoomDetailsState extends State<BnBRoomDetails>
         _hasError = false;
       });
 
-      // Debug: Print loaded images
-      print('📷 Loaded ${_images.length} room images:');
-      for (var img in _images) {
-        print('  - ID: ${img.id}, ImageUrl: ${img.imageUrl}');
-      }
     } catch (e) {
-      print('Error loading room data: $e');
       setState(() {
         _isLoading = false;
         _hasError = true;

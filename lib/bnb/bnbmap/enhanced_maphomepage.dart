@@ -78,7 +78,6 @@ class _EnhancedMapHomePageState extends State<EnhancedMapHomePage>
         _showSnackBar('Unable to get your current location');
       }
     } catch (e) {
-      print('Error getting location: $e');
       _showSnackBar('Error getting location: $e');
     } finally {
       setState(() {
@@ -111,7 +110,7 @@ class _EnhancedMapHomePageState extends State<EnhancedMapHomePage>
         _addMotelMarkers();
       }
     } catch (e) {
-      print('Error loading motels for map: $e');
+      // Error loading motels for map
     } finally {
       setState(() {
         _isLoadingMotels = false;

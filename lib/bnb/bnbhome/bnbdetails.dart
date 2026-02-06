@@ -116,7 +116,7 @@ class _BnBDetailsState extends State<BnBDetails> with TickerProviderStateMixin {
         _hasError = false;
       });
     } catch (e) {
-      print('Error loading motel data: $e');
+      // Error loading motel data
       setState(() {
         _isLoading = false;
         _hasError = true;

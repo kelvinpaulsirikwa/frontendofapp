@@ -33,8 +33,6 @@ class DistrictService {
     int? regionId,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching districts');
-
     Map<String, String> queryParams = {};
 
     if (search != null && search.isNotEmpty) {
@@ -49,8 +47,6 @@ class DistrictService {
       context: context,
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-
-    debugPrint('Districts Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       List<dynamic> districtsJson = response['data'];

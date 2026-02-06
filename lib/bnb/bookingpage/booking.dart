@@ -179,8 +179,6 @@ class _BookingPageState extends State<BookingPage> {
         );
       }
 
-      debugPrint('Booking Response: $response');
-
       if (!mounted) return;
       Navigator.of(context).pop();
 

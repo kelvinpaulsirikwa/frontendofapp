@@ -20,6 +20,17 @@ class ApiClient {
     navigatorKey = key;
   }
 
+  /// Set to true when you want to print debug logs to console.
+  static bool enableLogging = false;
+
+  /// Log a message. Only prints when [enableLogging] is true.
+  static void log(String message, [Object? data]) {
+    if (enableLogging) {
+      // ignore: avoid_print
+      print(data != null ? '$message $data' : message);
+    }
+  }
+
   /// Get authentication headers with token
   static Future<Map<String, String>> getAuthHeaders() async {
     final token = await UserPreferences.getApiToken();
@@ -56,7 +67,7 @@ class ApiClient {
 
   /// Handle 401 unauthorized response - logout user
   static Future<void> handleUnauthorized(BuildContext? context) async {
-    debugPrint('=== UNAUTHORIZED - Logging out user ===');
+    ApiClient.log('=== UNAUTHORIZED - Logging out user ===');
     
     // Clear all user data
     await UserPreferences.clearAll();
@@ -80,7 +91,7 @@ class ApiClient {
     http.Response response, {
     BuildContext? context,
   }) async {
-    debugPrint('API Response Status: ${response.statusCode}');
+    ApiClient.log('API Response Status: ${response.statusCode}');
     
     // Handle 401 Unauthorized
     if (response.statusCode == 401) {
@@ -150,7 +161,7 @@ class ApiClient {
         url += '?$queryString';
       }
 
-      debugPrint('GET Request: $url');
+      ApiClient.log('GET Request: $url');
 
       final response = await http
           .get(Uri.parse(url), headers: headers)
@@ -158,7 +169,7 @@ class ApiClient {
 
       return await processResponse(response, context: context);
     } catch (e) {
-      debugPrint('API GET Error: $e');
+      ApiClient.log('API GET Error: $e');
       return {
         'success': false,
         'message': 'Network error: ${e.toString()}',
@@ -187,8 +198,8 @@ class ApiClient {
       final headers = await getAuthHeaders();
       final url = '$baseUrl$endpoint';
 
-      debugPrint('POST Request: $url');
-      debugPrint('POST Body: $body');
+      ApiClient.log('POST Request: $url');
+      ApiClient.log('POST Body: $body');
 
       final response = await http
           .post(
@@ -200,7 +211,7 @@ class ApiClient {
 
       return await processResponse(response, context: context);
     } catch (e) {
-      debugPrint('API POST Error: $e');
+      ApiClient.log('API POST Error: $e');
       return {
         'success': false,
         'message': 'Network error: ${e.toString()}',
@@ -229,8 +240,8 @@ class ApiClient {
       final headers = await getAuthHeaders();
       final url = '$baseUrl$endpoint';
 
-      debugPrint('PUT Request: $url');
-      debugPrint('PUT Body: $body');
+      ApiClient.log('PUT Request: $url');
+      ApiClient.log('PUT Body: $body');
 
       final response = await http
           .put(
@@ -242,7 +253,7 @@ class ApiClient {
 
       return await processResponse(response, context: context);
     } catch (e) {
-      debugPrint('API PUT Error: $e');
+      ApiClient.log('API PUT Error: $e');
       return {
         'success': false,
         'message': 'Network error: ${e.toString()}',
@@ -270,7 +281,7 @@ class ApiClient {
       final headers = await getAuthHeaders();
       final url = '$baseUrl$endpoint';
 
-      debugPrint('DELETE Request: $url');
+      ApiClient.log('DELETE Request: $url');
 
       final response = await http
           .delete(Uri.parse(url), headers: headers)
@@ -278,7 +289,7 @@ class ApiClient {
 
       return await processResponse(response, context: context);
     } catch (e) {
-      debugPrint('API DELETE Error: $e');
+      ApiClient.log('API DELETE Error: $e');
       return {
         'success': false,
         'message': 'Network error: ${e.toString()}',

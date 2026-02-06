@@ -9,14 +9,10 @@ class ChatService {
     int? customerId,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching customer chats');
-
     final response = await ApiClient.get(
       '/customer/chats',
       context: context,
     );
-
-    debugPrint('Get Customer Chats Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       final List<dynamic> chatsJson = response['data'];
@@ -46,8 +42,6 @@ class ChatService {
     bool getAll = false, // New parameter to get all messages
     BuildContext? context,
   }) async {
-    debugPrint('Fetching chat messages for: $chatId');
-
     Map<String, String> queryParams = {};
     if (getAll) {
       queryParams['all'] = 'true';
@@ -61,8 +55,6 @@ class ChatService {
       context: context,
       queryParams: queryParams,
     );
-
-    debugPrint('Get Chat Messages Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       final List<dynamic> messagesJson = response['data'];
@@ -91,18 +83,13 @@ class ChatService {
     required String message,
     BuildContext? context,
   }) async {
-    debugPrint('Sending message to chat: $chatId');
-
     final requestBody = {'chat_id': chatId, 'message': message};
-    debugPrint('Request Body: $requestBody');
-
     final response = await ApiClient.post(
       '/chat/send-message',
       context: context,
       body: requestBody,
     );
 
-    debugPrint('Send Message Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       return {
@@ -126,23 +113,17 @@ class ChatService {
     String? startedBy,
     BuildContext? context,
   }) async {
-    debugPrint('Creating or getting chat for motel: $motelId');
-
     final requestBody = {
       if (bookingId != null) 'booking_id': bookingId,
       'motel_id': motelId,
       if (startedBy != null) 'started_by': startedBy,
     };
 
-    debugPrint('Request Body: $requestBody');
-
     final response = await ApiClient.post(
       '/chat/create-or-get',
       context: context,
       body: requestBody,
     );
-
-    debugPrint('Create or Get Chat Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       return {

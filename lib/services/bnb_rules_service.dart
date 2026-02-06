@@ -33,14 +33,10 @@ class BnbRulesService {
     int motelId, {
     BuildContext? context,
   }) async {
-    debugPrint('Fetching BNB rules for motel: $motelId');
-
     final response = await ApiClient.get(
       '/motels/$motelId/rules',
       context: context,
     );
-
-    debugPrint('BNB Rules Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       return {

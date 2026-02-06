@@ -69,7 +69,7 @@ class HomeDataService {
         'success': true,
       };
     } catch (e) {
-      debugPrint('Error loading home data: $e');
+      // Error loading home data
       return {
         'success': false,
         'error': e.toString(),
@@ -176,7 +176,7 @@ class HomeDataService {
         'success': true,
       };
     } catch (e) {
-      debugPrint('Error loading filtered data: $e');
+      // Error loading filtered data
       return {
         'success': false,
         'error': e.toString(),

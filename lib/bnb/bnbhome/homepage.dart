@@ -96,13 +96,12 @@ class _HomePageState extends State<HomePage>
           _isLoading = false;
         });
       } else {
-        print('Error loading data: ${data['error']}');
         setState(() {
           _isLoading = false;
         });
       }
     } catch (e) {
-      print('Error loading data: $e');
+      // Error loading data
       setState(() {
         _isLoading = false;
       });
@@ -158,9 +157,6 @@ class _HomePageState extends State<HomePage>
         _selectedType,
       );
 
-      print('Filtering by region: $_selectedRegion (ID: $regionId)');
-      print('Filtering by type: $_selectedType (ID: $typeId)');
-
       // Load filtered motels for "Near By" section based on region and type
       final filteredData = await HomeDataService.loadFilteredData(
         regionId: regionId > 0 ? regionId : null,
@@ -189,14 +185,12 @@ class _HomePageState extends State<HomePage>
           _isLoadingMore = false;
         });
       } else {
-        print('Error loading filtered data: ${filteredData['error']}');
         setState(() {
           _isLoading = false;
           _isLoadingMore = false;
         });
       }
     } catch (e) {
-      print('Error loading filtered motels: $e');
       setState(() {
         _isLoading = false;
         _isLoadingMore = false;

@@ -6,7 +6,6 @@ class LocationService {
       // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        print('Location services are disabled.');
         return null;
       }
 
@@ -15,13 +14,11 @@ class LocationService {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          print('Location permissions are denied');
           return null;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        print('Location permissions are permanently denied');
         return null;
       }
 
@@ -30,10 +27,8 @@ class LocationService {
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      print('Current location: ${position.latitude}, ${position.longitude}');
       return position;
     } catch (e) {
-      print('Error getting location: $e');
       return null;
     }
   }
@@ -54,7 +49,6 @@ class LocationService {
 
       return true;
     } catch (e) {
-      print('Error requesting location permission: $e');
       return false;
     }
   }
@@ -65,7 +59,6 @@ class LocationService {
       return permission != LocationPermission.denied &&
           permission != LocationPermission.deniedForever;
     } catch (e) {
-      print('Error checking location permission: $e');
       return false;
     }
   }

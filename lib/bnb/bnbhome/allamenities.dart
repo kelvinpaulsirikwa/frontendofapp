@@ -50,7 +50,7 @@ class _BnBAllAmenitiesState extends State<BnBAllAmenities> {
         _isLoadingMoreAmenities = false;
       });
     } catch (e) {
-      print('Error loading more amenities: $e');
+      // Error loading more amenities
       setState(() {
         _isLoadingMoreAmenities = false;
       });

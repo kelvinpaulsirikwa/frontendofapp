@@ -1,5 +1,4 @@
 import 'package:bnbfrontendflutter/services/api_client.dart';
-import 'package:flutter/material.dart';
 
 class BookingService {
   /// Format date for API (YYYY-MM-DD)
@@ -18,8 +17,6 @@ class BookingService {
     String? specialRequests,
     BuildContext? context,
   }) async {
-    debugPrint('Creating booking for room: $roomId ($checkInDate → $checkOutDate)');
-
     final requestBody = {
       'room_id': roomId,
       'customer_id': customerId,
@@ -37,7 +34,6 @@ class BookingService {
       body: requestBody,
     );
 
-    debugPrint('Create Booking Response: ${response['success']}');
     return response;
   }
 
@@ -63,8 +59,6 @@ class BookingService {
         .toList()
       ..sort();
 
-    debugPrint('Creating bookings for room: $roomId, dates: $selectedDatesFormatted');
-
     final requestBody = {
       'room_id': roomId,
       'customer_id': customerId,
@@ -81,7 +75,6 @@ class BookingService {
       body: requestBody,
     );
 
-    debugPrint('Create Bookings Response: ${response['success']}');
     return response;
   }
 
@@ -92,8 +85,6 @@ class BookingService {
     required String checkOutDate,
     BuildContext? context,
   }) async {
-    debugPrint('Checking room availability: room=$roomId, $checkInDate → $checkOutDate');
-
     final response = await ApiClient.post(
       '/check-room-availability',
       context: context,
@@ -112,8 +103,6 @@ class BookingService {
     int bookingId, {
     BuildContext? context,
   }) async {
-    debugPrint('Getting booking: $bookingId');
-
     return ApiClient.get('/booking/$bookingId', context: context);
   }
 
@@ -166,8 +155,6 @@ class BookingService {
     String? paymentReference,
     BuildContext? context,
   }) async {
-    debugPrint('Retrying payment for booking: $bookingId');
-
     return ApiClient.post(
       '/retry-payment/$bookingId',
       context: context,
@@ -184,8 +171,6 @@ class BookingService {
     required int customerId,
     BuildContext? context,
   }) async {
-    debugPrint('Canceling booking: $bookingId');
-
     return ApiClient.post(
       '/booking/cancel',
       context: context,

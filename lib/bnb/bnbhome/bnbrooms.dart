@@ -71,7 +71,7 @@ class _BnBRoomsState extends State<BnBRooms> with TickerProviderStateMixin {
         _filters = ['All', 'Available', ...roomTypes];
       });
     } catch (e) {
-      print('Error loading motel room types: $e');
+      // Error loading motel room types
     }
   }
 
@@ -101,7 +101,6 @@ class _BnBRoomsState extends State<BnBRooms> with TickerProviderStateMixin {
         _hasError = false;
       });
     } catch (e) {
-      print('Error loading rooms: $e');
       setState(() {
         _isLoading = false;
         _hasError = true;
@@ -135,7 +134,6 @@ class _BnBRoomsState extends State<BnBRooms> with TickerProviderStateMixin {
           _isLoading = false;
         });
       } catch (e) {
-        print('Error loading more rooms: $e');
         setState(() {
           _isLoading = false;
         });

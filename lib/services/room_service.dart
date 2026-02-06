@@ -11,8 +11,6 @@ class RoomService {
     String? roomType,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching rooms for motel: $motelId');
-
     Map<String, String> queryParams = {
       'page': page.toString(),
       'limit': limit.toString(),
@@ -31,8 +29,6 @@ class RoomService {
       queryParams: queryParams,
     );
 
-    debugPrint('Rooms Response: $response');
-
     if (response['success'] == true && response['data'] != null) {
       List<dynamic> roomsJson = response['data'];
       return roomsJson.map((roomJson) => Room.fromJson(roomJson)).toList();
@@ -45,14 +41,10 @@ class RoomService {
     int motelId, {
     BuildContext? context,
   }) async {
-    debugPrint('Fetching room types for motel: $motelId');
-
     final response = await ApiClient.get(
       '/motels/$motelId/room-types',
       context: context,
     );
-
-    debugPrint('Room Types Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       List<dynamic> roomTypesJson = response['data'];

@@ -43,7 +43,7 @@ Download $appname App for the best experience!
         subject: 'Check out ${motel.name} on Tanzania BnB',
       );
     } catch (e) {
-      print('Error sharing property: $e');
+      // Error sharing property
       rethrow;
     }
   }
@@ -76,7 +76,7 @@ Download $appname App for the best experience!
         subject: 'Check out ${room.roomnumber} at ${property.name}',
       );
     } catch (e) {
-      print('Error sharing room: $e');
+      // Error sharing room
       rethrow;
     }
   }
@@ -103,7 +103,7 @@ Download $appname App for the best experience!
       // 3. Use Share.shareXFiles([XFile(imagePath)])
       // This requires additional implementation
     } catch (e) {
-      print('Error sharing image: $e');
+      // Error sharing image
       rethrow;
     }
   }

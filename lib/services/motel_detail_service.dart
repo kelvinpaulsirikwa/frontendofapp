@@ -185,14 +185,10 @@ class MotelDetailService {
     int motelId, {
     BuildContext? context,
   }) async {
-    debugPrint('Fetching motel details for: $motelId');
-
     final response = await ApiClient.get(
       '/motels/$motelId/details',
       context: context,
     );
-
-    debugPrint('Motel Details Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       return BnbMotelsDetailsModel.fromJson(response['data']);
@@ -207,8 +203,6 @@ class MotelDetailService {
     int limit = 5,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching motel images for: $motelId');
-
     final queryParams = {
       'page': page.toString(),
       'limit': limit.toString(),
@@ -219,8 +213,6 @@ class MotelDetailService {
       context: context,
       queryParams: queryParams,
     );
-
-    debugPrint('Motel Images Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       List<dynamic> imagesJson = response['data'];
@@ -239,7 +231,6 @@ class MotelDetailService {
     int limit = 10,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching paging motel images for: $motelId');
 
     final queryParams = {
       'page': page.toString(),
@@ -252,7 +243,6 @@ class MotelDetailService {
       queryParams: queryParams,
     );
 
-    debugPrint('Paging Motel Images Response: $response');
     return response;
   }
 
@@ -262,7 +252,6 @@ class MotelDetailService {
     int limit = 10,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching motel amenities for: $motelId');
 
     final queryParams = {
       'page': page.toString(),
@@ -274,8 +263,6 @@ class MotelDetailService {
       context: context,
       queryParams: queryParams,
     );
-
-    debugPrint('Motel Amenities Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       List<dynamic> amenitiesJson = response['data'];

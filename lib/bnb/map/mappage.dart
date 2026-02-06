@@ -70,9 +70,6 @@ class _MapPageState extends State<MapPage> {
     if (currentMotels != oldMotels ||
         currentMotels.length != oldMotels.length ||
         currentMotels.length != motels.length) {
-      print(
-        '🗺️ MapPage: Motels updated - old: ${oldMotels.length}, new: ${currentMotels.length}, current: ${motels.length}',
-      );
       _updateMotels(currentMotels);
     }
 
@@ -138,7 +135,7 @@ class _MapPageState extends State<MapPage> {
         ),
       );
     } catch (e) {
-      print('Error animating camera: $e');
+      // Error animating camera
     }
   }
 
@@ -157,13 +154,11 @@ class _MapPageState extends State<MapPage> {
         _updateMotels(motels);
       }
     } catch (error) {
-      print('Error loading custom marker icon: $error');
       // Keep default marker, map is already showing
     }
   }
 
   void _updateMotels(List<Map<String, dynamic>> newMotels) {
-    print('🗺️ MapPage: Updating motels - count: ${newMotels.length}');
     setState(() {
       motels = List.from(
         newMotels,
@@ -194,7 +189,6 @@ class _MapPageState extends State<MapPage> {
           }
         }
       }
-      print('🗺️ MapPage: Created ${motelMarkers.length} markers');
     });
 
     // Notify parent if callback exists
@@ -205,16 +199,11 @@ class _MapPageState extends State<MapPage> {
 
   @override
   void dispose() {
-    print("🗺️ MapPage: Disposing...");
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    print(
-      "🔍 MapPage: Building widget - currentPosition: ${currentPosition != null}, customMarkerIcon: ${customMarkerIcon != null}, motels: ${motels.length}, markers: ${motelMarkers.length}",
-    );
-
     return Scaffold(
       appBar: KivuliAppBar(),
       body: currentPosition == null
@@ -240,7 +229,6 @@ class _MapPageState extends State<MapPage> {
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
                       onPressed: () {
-                        print("🔄 MapPage: Retrying location...");
                         _initializeLocation();
                       },
                       icon: const Icon(Icons.refresh),
@@ -249,7 +237,6 @@ class _MapPageState extends State<MapPage> {
                     const SizedBox(height: 8),
                     TextButton(
                       onPressed: () {
-                        print("📍 MapPage: Using default location...");
                         setState(() {
                           currentPosition = const LatLng(-6.7783, 39.2058);
                         });

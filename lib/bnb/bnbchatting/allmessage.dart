@@ -36,8 +36,6 @@ class _AllMessageState extends State<AllMessage> {
       // Get customer ID directly from shared preferences
       final customerId = await UserPreferences.getCustomerId();
 
-      debugPrint('Loaded customer ID: $customerId');
-
       if (customerId != null) {
         setState(() {
           _customerId = customerId;
@@ -161,7 +159,6 @@ class _AllMessageState extends State<AllMessage> {
         setState(() {
           _isLoadingBookings = false;
         });
-        debugPrint('Error loading active bookings: $e');
       }
     }
   }
@@ -254,7 +251,6 @@ class _AllMessageState extends State<AllMessage> {
         }
       }
     } catch (e) {
-      debugPrint('Error refreshing chats: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

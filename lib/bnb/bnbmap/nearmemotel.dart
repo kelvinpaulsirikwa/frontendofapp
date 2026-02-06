@@ -104,7 +104,6 @@ class _NearMeMotelState extends State<NearMeMotel> {
       }
       await _loadNearMeMotels();
     } catch (e) {
-      print('Error getting location: $e');
       // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
@@ -159,15 +158,12 @@ class _NearMeMotelState extends State<NearMeMotel> {
         // Notify parent about updated motels AFTER state update
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (widget.onMotelsUpdated != null && mounted) {
-            print(
-              '📍 NearMeMotel: Notifying parent with ${_nearMeMotels.length} motels',
-            );
             widget.onMotelsUpdated!(_nearMeMotels);
           }
         });
       }
     } catch (e) {
-      print('Error loading near me motels: $e');
+      // Error loading near me motels
     } finally {
       setState(() {
         _isLoading = false;

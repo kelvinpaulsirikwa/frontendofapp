@@ -20,8 +20,6 @@ class SimpleMotelService {
     double? longitude,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching motels');
-
     Map<String, String> queryParams = {};
 
     if (search != null && search.isNotEmpty) {
@@ -60,8 +58,6 @@ class SimpleMotelService {
       context: context,
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-
-    debugPrint('Motels Response: $response');
 
     // Check if unauthorized - return empty result (ApiClient handles logout)
     if (response['unauthorized'] == true) {
@@ -105,8 +101,6 @@ class SimpleMotelService {
     double? longitude,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching featured motels');
-
     Map<String, String>? queryParams;
 
     // Add location parameters for distance-based sorting
@@ -122,8 +116,6 @@ class SimpleMotelService {
       context: context,
       queryParams: queryParams,
     );
-
-    debugPrint('Featured Motels Response: $response');
 
     // Check if unauthorized - return empty result (ApiClient handles logout)
     if (response['unauthorized'] == true) {
@@ -223,7 +215,7 @@ class SimpleMotelService {
       // Limit to 10 items for "Near By" section
       return featuredMotels.take(10).toList();
     } catch (e) {
-      debugPrint('Error getting featured motels for UI: $e');
+      // Error getting featured motels for UI
       // Return empty list if API fails
       return [];
     }
@@ -256,7 +248,7 @@ class SimpleMotelService {
       );
       return result;
     } catch (e) {
-      debugPrint('Error getting popular motels for UI: $e');
+      // Error getting popular motels for UI
       return {
         'motels': <SimpleMotel>[],
         'pagination': <String, dynamic>{},

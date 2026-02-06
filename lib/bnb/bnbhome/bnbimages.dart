@@ -47,7 +47,7 @@ class _BnBHotelImagesState extends State<BnBHotelImages> {
     try {
       _loadImages();
     } catch (e) {
-      debugPrint('Error loading motel data: $e');
+      // Error loading motel data
       setState(() {
         _errorMessage = 'Error loading motel data: $e';
       });

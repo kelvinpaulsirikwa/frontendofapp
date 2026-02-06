@@ -25,9 +25,6 @@ class _RoomsMapsState extends State<RoomsMaps> {
     List<Map<String, dynamic>> updatedMotels,
     String tabType,
   ) {
-    print(
-      '📍 RoomsMaps: Motels updated - tab: $tabType, count: ${updatedMotels.length}, currentTab: $_currentTabType',
-    );
     setState(() {
       // Always update motels if they match the current tab
       // This ensures markers stay in sync when switching tabs
@@ -35,13 +32,7 @@ class _RoomsMapsState extends State<RoomsMaps> {
         motels = List.from(
           updatedMotels,
         ); // Create new list to ensure reference change
-        print(
-          '📍 RoomsMaps: Updated motels list - new count: ${motels.length}',
-        );
       } else {
-        print(
-          '📍 RoomsMaps: Ignoring update from inactive tab ($tabType vs $_currentTabType)',
-        );
         // If we're switching tabs but the old tab sends an update, we can optionally
         // clear the motels if the new tab hasn't loaded yet
         // But it's better to keep the old markers visible until new ones load
@@ -50,7 +41,6 @@ class _RoomsMapsState extends State<RoomsMaps> {
   }
 
   void _onTabChanged(String tabType) {
-    print('📍 RoomsMaps: Tab changed to: $tabType');
     setState(() {
       _currentTabType = tabType;
       // Clear search radius when switching away from near_me tab
@@ -65,7 +55,6 @@ class _RoomsMapsState extends State<RoomsMaps> {
   }
 
   void _onRadiusChanged(double radius, Position? position) {
-    print('📍 RoomsMaps: Radius changed - radius: $radius km');
     setState(() {
       _searchRadius = radius;
       if (position != null) {

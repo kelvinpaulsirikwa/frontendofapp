@@ -90,7 +90,6 @@ class _DirectMeState extends State<DirectMe> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error initializing map: $e');
       setState(() {
         _errorMessage = 'Error loading map: $e';
         _isLoading = false;
@@ -251,7 +250,6 @@ class _DirectMeState extends State<DirectMe> {
 
   Future<void> _getDirections() async {
     if (_currentPosition == null || _destination == null) {
-      print('❌ Cannot get directions: Missing current position or destination');
       return;
     }
 
@@ -268,12 +266,8 @@ class _DirectMeState extends State<DirectMe> {
           'https://maps.googleapis.com/maps/api/directions/json?'
           'origin=$origin&destination=$dest&key=${BnBVariables.googleapikey}';
 
-      print('📡 Requesting directions from: $origin to $dest');
-
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
-
-      print('📥 Directions API Response Status: ${data['status']}');
 
       if (data['status'] == 'OK') {
         List<dynamic> routes = data['routes'];
@@ -284,13 +278,11 @@ class _DirectMeState extends State<DirectMe> {
               _distance = legs[0]['distance']['text'] ?? '';
               _duration = legs[0]['duration']['text'] ?? '';
             });
-            print('✅ Route found: Distance: $_distance, Duration: $_duration');
           }
 
           // Decode polyline
           String polylinePoints = routes[0]['overview_polyline']['points'];
           _routePoints = _decodePolyline(polylinePoints);
-          print('✅ Decoded ${_routePoints.length} route points');
 
           // Add polyline to map
           setState(() {
@@ -313,19 +305,9 @@ class _DirectMeState extends State<DirectMe> {
         throw Exception(errorMsg);
       }
     } catch (e) {
-      print('❌ Error getting directions: $e');
-      print('❌ Error type: ${e.runtimeType}');
-      if (e.toString().contains('SocketException') ||
-          e.toString().contains('TimeoutException')) {
-        print('❌ Network error: No internet connection or timeout');
-      }
-      
       setState(() {
         _isLoadingRoute = false;
       });
-
-      // Just print error, no dialog
-      print('❌ Failed to load route directions. Error details: ${e.toString()}');
     }
   }
 
@@ -378,8 +360,7 @@ class _DirectMeState extends State<DirectMe> {
         points.add(LatLng(lat / 1E5, lng / 1E5));
       }
     } catch (e) {
-      print('❌ Error decoding polyline: $e');
-      print('❌ Polyline string: $polyline');
+      // Error decoding polyline
     }
     return points;
   }

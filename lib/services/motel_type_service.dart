@@ -51,8 +51,6 @@ class MotelTypeService {
     String? search,
     BuildContext? context,
   }) async {
-    debugPrint('Fetching motel types');
-
     Map<String, String>? queryParams;
     if (search != null && search.isNotEmpty) {
       queryParams = {'search': search};
@@ -63,8 +61,6 @@ class MotelTypeService {
       context: context,
       queryParams: queryParams,
     );
-
-    debugPrint('Motel Types Response: $response');
 
     if (response['success'] == true && response['data'] != null) {
       List<dynamic> typesJson = response['data'];

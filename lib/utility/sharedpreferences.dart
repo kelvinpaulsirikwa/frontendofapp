@@ -48,16 +48,16 @@ class UserPreferences {
     await prefs.clear();
   }
 
-  // Debug method to print all saved data
-  static Future<void> debugPrintAllData() async {
+  /// Debug method - call ApiClient.log() with returned data when ApiClient.enableLogging is true.
+  static Future<Map<String, String?>> debugPrintAllData() async {
     final prefs = await _prefs;
-    print("=== UserPreferences Debug Data ===");
-    print("Username: ${prefs.getString('username')}");
-    print("Email: ${prefs.getString('email')}");
-    print("Account ID: ${prefs.getString('accountid')}");
-    print("API Token: ${prefs.getString('apiToken')}");
-    print("Google Image URL: ${prefs.getString('googleimageurl')}");
-    print("===================================");
+    return {
+      'Username': prefs.getString('username'),
+      'Email': prefs.getString('email'),
+      'Account ID': prefs.getString('accountid'),
+      'API Token': prefs.getString('apiToken'),
+      'Google Image URL': prefs.getString('googleimageurl'),
+    };
   }
 
   // Check if user is logged in (has valid data)

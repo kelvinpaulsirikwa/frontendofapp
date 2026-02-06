@@ -74,15 +74,12 @@ class _TopSearchMotelState extends State<TopSearchMotel> {
         // Notify parent about updated motels AFTER state update
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (widget.onMotelsUpdated != null && mounted) {
-            print(
-              '📍 TopSearchMotel: Notifying parent with ${_topSearchedMotels.length} motels',
-            );
             widget.onMotelsUpdated!(_topSearchedMotels);
           }
         });
       }
     } catch (e) {
-      print('Error loading top searched motels: $e');
+      // Error loading top searched motels
     } finally {
       setState(() {
         _isLoading = false;

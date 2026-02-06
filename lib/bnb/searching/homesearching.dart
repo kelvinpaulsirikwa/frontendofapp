@@ -89,7 +89,6 @@ class _HomeSearchingState extends State<HomeSearching> {
 
       return DistanceCalculator.formatDistance(distance);
     } catch (e) {
-      print('Error calculating distance: $e');
       return '';
     }
   }
@@ -135,7 +134,7 @@ class _HomeSearchingState extends State<HomeSearching> {
         _availableAmenities = amenities;
       });
     } catch (e) {
-      print('Error loading filters: $e');
+      // Error loading filters
     } finally {
       setState(() {
         _isLoadingFilters = false;
@@ -183,7 +182,7 @@ class _HomeSearchingState extends State<HomeSearching> {
         }
       }
     } catch (e) {
-      print('Error searching motels: $e');
+      // Error searching motels
     } finally {
       setState(() {
         _isLoading = false;
