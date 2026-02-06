@@ -1,5 +1,6 @@
 import 'package:bnbfrontendflutter/services/api_client.dart';
 import 'package:bnbfrontendflutter/services/bnbconnection.dart';
+import 'package:flutter/material.dart';
 
 class SearchService {
   static Future<List<dynamic>> getRegions({

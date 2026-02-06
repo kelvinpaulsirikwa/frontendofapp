@@ -1,4 +1,5 @@
 import 'package:bnbfrontendflutter/services/api_client.dart';
+import 'package:flutter/material.dart';
 
 class BookingService {
   /// Format date for API (YYYY-MM-DD)

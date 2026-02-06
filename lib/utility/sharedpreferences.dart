@@ -48,7 +48,7 @@ class UserPreferences {
     await prefs.clear();
   }
 
-  /// Debug method - call ApiClient.log() with returned data when ApiClient.enableLogging is true.
+  /// Debug method - returns saved user data.
   static Future<Map<String, String?>> debugPrintAllData() async {
     final prefs = await _prefs;
     return {
