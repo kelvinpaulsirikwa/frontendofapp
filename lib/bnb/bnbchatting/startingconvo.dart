@@ -63,6 +63,9 @@ class _StartingConvoState extends State<StartingConvo> {
         limit: 20,
       );
 
+      debugPrint('===== /booking/customer/${widget.customerId} API Response =====');
+      debugPrint('$response');
+
       if (response['success'] == true) {
         final List<dynamic> data = response['data'] ?? [];
         final bookings = data
@@ -97,6 +100,9 @@ class _StartingConvoState extends State<StartingConvo> {
         page: _currentPage,
         limit: 20,
       );
+
+      debugPrint('===== /booking/customer/${widget.customerId} (page $_currentPage) API Response =====');
+      debugPrint('$response');
 
       if (response['success'] == true) {
         final List<dynamic> data = response['data'] ?? [];

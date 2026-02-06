@@ -1,4 +1,5 @@
 import 'package:bnbfrontendflutter/bnb/bnbchatting/messagechat.dart';
+import 'package:bnbfrontendflutter/utility/images.dart';
 import 'package:bnbfrontendflutter/utility/navigateutility.dart';
 import 'package:flutter/material.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
@@ -7,111 +8,159 @@ class BookingCard extends StatelessWidget {
   final BookingModel booking;
   final VoidCallback onTap;
 
-  const BookingCard({super.key, required this.booking, required this.onTap});
+  const BookingCard({
+    super.key,
+    required this.booking,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final motel = booking.motel;
     final room = booking.room;
 
-    return InkWell(
-      onTap: () {
-        NavigationUtil.pushwithslideTo(
-          context,
-          MessageChat(
-            bookingId: booking.id,
-            motelId: motel.id,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: earthGreen.withOpacity(0.2)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: earthGreen.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: const Icon(Icons.hotel, color: earthGreen, size: 24),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    motel.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: textDark,
-                    ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: () {
+            NavigationUtil.pushwithslideTo(
+              context,
+              MessageChat(booking: booking),
+            );
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Left: Hotel Image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    width: 90,
+                    height: 90,
+                    child: motel.frontImage != null && motel.frontImage!.isNotEmpty
+                        ? Showimage.networkImage(imageUrl: motel.frontImage!)
+                        : Container(
+                            color: earthGreen.withOpacity(0.1),
+                            child: const Icon(Icons.hotel, size: 32, color: earthGreen),
+                          ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "${room.roomType} - ${room.roomNumber}",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: textDark.withOpacity(0.7),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "District: ${motel.district}",
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: textDark.withOpacity(0.6),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Row(
+                ),
+                const SizedBox(width: 12),
+                // Right: Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.chat_bubble_outline,
-                        size: 14,
-                        color: earthGreen,
-                      ),
-                      SizedBox(width: 4),
                       Text(
-                        'Tap to start chatting',
+                        motel.name,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1A1A2E),
+                          height: 1.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${motel.address}, ${motel.district}',
                         style: TextStyle(
                           fontSize: 12,
-                          color: earthGreen,
-                          fontWeight: FontWeight.w500,
+                          color: Colors.grey.shade600,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Room ${room.roomNumber}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: earthGreen.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              room.roomType,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: earthGreen,
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: earthGreen, width: 1.5),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Chat',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: earthGreen,
+                                  ),
+                                ),
+                                SizedBox(width: 2),
+                                Icon(
+                                  Icons.arrow_forward_rounded,
+                                  size: 12,
+                                  color: earthGreen,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: textDark.withOpacity(0.3),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
+
+
 
 class BookingModel {
   final int id;
@@ -217,20 +266,23 @@ class MotelModel {
   final String name;
   final String address;
   final String district;
+  final String? frontImage;
 
   MotelModel({
     required this.id,
     required this.name,
     required this.address,
     required this.district,
+    this.frontImage,
   });
 
   factory MotelModel.fromJson(Map<String, dynamic> json) {
     return MotelModel(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
-      address: json['address'] ?? '',
+      address: json['address'] ?? json['street_address'] ?? '',
       district: json['district'] ?? '',
+      frontImage: (json['front_image'] ?? json['image'])?.toString(),
     );
   }
 }

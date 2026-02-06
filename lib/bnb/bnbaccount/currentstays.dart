@@ -353,11 +353,7 @@ class _CurrentStaysState extends State<CurrentStays> {
                     onPressed: () {
                       NavigationUtil.pushTo(
                         context,
-                        MessageChat(
-                          bookingId: booking.id,
-                          motelId: booking.motel.id,
-                          motelName: booking.motel.name,
-                        ),
+                        MessageChat(booking: booking),
                       );
                     },
                     style: ElevatedButton.styleFrom(

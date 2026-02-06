@@ -1,3 +1,4 @@
+import 'package:bnbfrontendflutter/bnb/bnbchatting/ui.dart' as chat_ui;
 import 'package:bnbfrontendflutter/utility/images.dart';
 import 'package:flutter/material.dart';
 import 'package:bnbfrontendflutter/models/chat_model.dart';
@@ -194,9 +195,7 @@ class _AllMessageState extends State<AllMessage> {
             context,
             MaterialPageRoute(
               builder: (context) => MessageChat(
-                bookingId: booking.id,
-                motelId: booking.motel.id,
-                motelName: booking.motel.name,
+                booking: booking,
                 onMessageSent: () {
                   // Refresh chats immediately when a message is sent
                   _refreshChats();
@@ -265,6 +264,33 @@ class _AllMessageState extends State<AllMessage> {
         );
       }
     }
+  }
+
+  /// Creates a minimal chat_ui.BookingModel from ChatModel for MessageChat.
+  chat_ui.BookingModel _bookingFromChat(ChatModel chat) {
+    return chat_ui.BookingModel(
+      id: chat.bookingId ?? 0,
+      bookingReference: '',
+      status: '',
+      checkInDate: null,
+      checkOutDate: null,
+      totalAmount: null,
+      createdAt: '',
+      room: chat_ui.RoomModel(
+        id: 0,
+        roomNumber: '',
+        roomType: '',
+        pricePerNight: '0',
+      ),
+      motel: chat_ui.MotelModel(
+        id: chat.motel.id,
+        name: chat.motel.name,
+        address: chat.motel.streetAddress ?? '',
+        district: '',
+        frontImage: chat.motel.frontImage,
+      ),
+      transactions: [],
+    );
   }
 
   List<ChatModel> _sortChatsByRecent(List<ChatModel> chats) {
@@ -500,9 +526,7 @@ class _AllMessageState extends State<AllMessage> {
           context,
           MaterialPageRoute(
             builder: (context) => MessageChat(
-              bookingId: chat.bookingId,
-              motelId: chat.motelId,
-              motelName: motelName,
+              booking: _bookingFromChat(chat),
               onMessageSent: () {
                 // Refresh chats immediately when a message is sent
                 _refreshChats();

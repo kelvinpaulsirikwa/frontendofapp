@@ -7,16 +7,13 @@ import 'package:bnbfrontendflutter/utility/colors.dart';
 import 'package:intl/intl.dart';
 
 class MessageChat extends StatefulWidget {
-  final int? bookingId;
-  final int motelId;
-  final String? motelName;
+  /// Accepts BookingModel (from ui.dart) or any object with `id` and `motel` (with `id`, `name`).
+  final dynamic booking;
   final VoidCallback? onMessageSent;
 
   const MessageChat({
     super.key,
-    this.bookingId,
-    required this.motelId,
-    this.motelName,
+    required this.booking,
     this.onMessageSent,
   });
 
@@ -188,8 +185,8 @@ class _MessageChatState extends State<MessageChat> {
     try {
       // Step 1: Get or create the chat based on bookingId, motelId, and customerId
       final chatResponse = await ChatService.createOrGetChat(
-        bookingId: widget.bookingId,
-        motelId: widget.motelId,
+        bookingId: widget.booking.id,
+        motelId: widget.booking.motel.id,
         context: context,
       );
 
@@ -285,8 +282,8 @@ class _MessageChatState extends State<MessageChat> {
       if (chatIdToUse == null) {
         // Step 1: Create or get the chat
         final chatResponse = await ChatService.createOrGetChat(
-          bookingId: widget.bookingId,
-          motelId: widget.motelId,
+          bookingId: widget.booking.id,
+          motelId: widget.booking.motel.id,
           context: context,
         );
 
@@ -407,7 +404,7 @@ class _MessageChatState extends State<MessageChat> {
         backgroundColor: earthGreen,
         foregroundColor: softCream,
         title: Text(
-          widget.motelName ?? 'Chat',
+          widget.booking.motel.name,
           style: const TextStyle(color: softCream, fontWeight: FontWeight.bold),
         ),
         elevation: 0,
