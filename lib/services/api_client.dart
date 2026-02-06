@@ -28,11 +28,24 @@ class ApiClient {
       'Accept': 'application/json',
     };
 
+    // Bypass tunnel interstitials (ngrok, serveo, localtunnel, etc.)
+    if (_isTunnelDomain(baseUrl)) {
+      headers['ngrok-skip-browser-warning'] = '1';
+    }
+
     if (token != null && token.isNotEmpty) {
       headers['Authorization'] = 'Bearer $token';
     }
 
     return headers;
+  }
+
+  static bool _isTunnelDomain(String url) {
+    final lower = url.toLowerCase();
+    return lower.contains('ngrok') ||
+        lower.contains('serveo') ||
+        lower.contains('localtunnel') ||
+        lower.contains('cloudflared');
   }
 
   /// Check if user has a valid token
