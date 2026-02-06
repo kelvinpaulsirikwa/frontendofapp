@@ -77,7 +77,8 @@ class SearchService {
       queryParams: queryParams,
     );
 
-    debugPrint('Search Motels Response: $response');
+    debugPrint('===== /search/motels API Response =====');
+    debugPrint('$response');
 
     if (response['success'] == true && response['data'] != null) {
       // Construct full image URLs for each motel
@@ -137,12 +138,13 @@ class SearchService {
     List<int> motelIds, {
     BuildContext? context,
   }) async {
-    debugPrint('Tracking search for motels: $motelIds');
+    final body = {'motel_ids': motelIds};
+    debugPrint('Track Search Request Body: $body');
 
     final response = await ApiClient.post(
       '/search/track',
       context: context,
-      body: {'motel_ids': motelIds},
+      body: body,
     );
 
     debugPrint('Track Search Response: $response');

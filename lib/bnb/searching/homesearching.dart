@@ -1,4 +1,5 @@
 import 'package:bnbfrontendflutter/bnb/reusablecomponent/layout.dart';
+import 'package:bnbfrontendflutter/layouts/loading.dart';
 import 'package:bnbfrontendflutter/utility/colors.dart';
 import 'package:bnbfrontendflutter/services/search_service.dart';
 import 'package:bnbfrontendflutter/services/location_service.dart';
@@ -262,7 +263,7 @@ class _HomeSearchingState extends State<HomeSearching> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Container(
-                        height: 36,
+                        height: 46,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         decoration: BoxDecoration(
                           color: softCream,
@@ -696,7 +697,7 @@ class _HomeSearchingState extends State<HomeSearching> {
             // Results list - Play Store style
             Expanded(
               child: _isLoading && _searchResults.isEmpty
-                  ? const Center(child: CircularProgressIndicator())
+                  ?   Center(child: Loading.infiniteLoading(context))
                   : _searchResults.isEmpty
                   ? Center(
                       child: Column(
@@ -993,7 +994,7 @@ class _HomeSearchingState extends State<HomeSearching> {
                                             const SizedBox(width: 3),
                                             Expanded(
                                               child: Text(
-                                                hotel['location'] ?? '',
+                                                hotel['street_address'] ?? '',
                                                 style: const TextStyle(
                                                   color: textLight,
                                                   fontSize: 11,

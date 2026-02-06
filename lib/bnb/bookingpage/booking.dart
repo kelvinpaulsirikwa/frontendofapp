@@ -155,44 +155,31 @@ class _BookingPageState extends State<BookingPage> {
     );
 
     try {
-      Map<String, dynamic> response;
+      final Map<String, dynamic> response;
       if (_bookingMode == 'pick_dates') {
-        final dates = List<DateTime>.from(_selectedDates);
-        response = {'success': true, 'message': 'Bookings created successfully'};
-        for (int i = 0; i < dates.length; i++) {
-          final checkIn = dates[i];
-          final checkOut = checkIn.add(const Duration(days: 1));
-          final r = await BookingService.createBookingAndProcessPayment(
-            roomId: widget.room.id,
-            customerId: 1,
-            checkInDate: _fmt(checkIn),
-            checkOutDate: _fmt(checkOut),
-            contactNumber: _bookerNumberController.text,
-            paymentMethod: _paymentMethod,
-            paymentReference: _mobileNumberController.text,
-            specialRequests: null,
-          );
-          if (r['success'] != true) {
-            response = r;
-            response['message'] = 'Failed on date ${_fmt(checkIn)}: ${r['message'] ?? 'Unknown error'}';
-            break;
-          }
-          response = r;
-        }
+        response = await BookingService.createBookingsForPickDates(
+          roomId: widget.room.id,
+          customerId: 1,
+          selectedDates: List.from(_selectedDates),
+          contactNumber: _bookerNumberController.text,
+          paymentMethod: _paymentMethod,
+          paymentReference: _mobileNumberController.text,
+          specialRequests: null,
+        );
       } else {
-        final checkIn = _today;
-        final checkOut = _checkOutDate;
         response = await BookingService.createBookingAndProcessPayment(
           roomId: widget.room.id,
           customerId: 1,
-          checkInDate: _fmt(checkIn),
-          checkOutDate: _fmt(checkOut),
+          checkInDate: _fmt(_today),
+          checkOutDate: _fmt(_checkOutDate),
           contactNumber: _bookerNumberController.text,
           paymentMethod: _paymentMethod,
           paymentReference: _mobileNumberController.text,
           specialRequests: null,
         );
       }
+
+      debugPrint('Booking Response: $response');
 
       if (!mounted) return;
       Navigator.of(context).pop();
