@@ -55,7 +55,7 @@ class _AboutBnBState extends State<AboutBnB> {
     return Scaffold(
       backgroundColor: warmSand,
       appBar: SingleMGAppBar(
-        'About Tanzania BnB',
+        'About BnB',
         context: context,
         isTitleCentered: true,
       ),
@@ -261,7 +261,9 @@ class _AboutBnBState extends State<AboutBnB> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            '${region.totalMotels} motels',
+(region.totalMotels ?? 0) == 0
+    ? 'None'
+    : '${region.totalMotels} ${region.totalMotels == 1 ? 'stay' : 'stays'}',
                             style: const TextStyle(
                               color: earthGreen,
                               fontSize: 12,
